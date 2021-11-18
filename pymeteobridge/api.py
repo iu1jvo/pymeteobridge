@@ -7,8 +7,8 @@ import ast
 import logging
 from typing import Optional
 
-from pymeteobridge.data import StationDescription
-from pymeteobridge.const import FIELDS_STATION, UNIT_TYPE_METRIC, VALID_UNIT_TYPES
+from pymeteobridge.data import ObservationDescription, StationDescription
+from pymeteobridge.const import FIELDS_OBSERVATION, FIELDS_STATION, UNIT_TYPE_METRIC, VALID_UNIT_TYPES
 from pymeteobridge.exceptions import  Invalid,  BadRequest, NotAuthorized
 from pymeteobridge.helpers import Conversions
 
@@ -69,6 +69,32 @@ class MeteobridgeApiClient:
                 ip=data["ip"],
             )
             self._station_data = station_data
+        return None
+        
+    async def update_observations(self) -> None:
+        """Update observation data."""
+        if self._station_data is None:
+            return
+
+        data_fields = self.build_endpoint(FIELDS_OBSERVATION)
+        endpoint = f"{self.base_url}{data_fields}"
+        data = await self._api_request(endpoint)
+        if data is not None:
+            entity_data = ObservationDescription(
+                key=self._station_data.key,
+                temperature=data["temperature"],
+                wind_chill=data["wind_chill"],
+                air_pm_10=data["air_pm_10"],
+                air_pm_25=data["air_pm_25"],
+                air_pm_1=data["air_pm_1"],
+                heat_index=data["heat_index"],
+                humidity=data["humidity"],
+                wind_avg=data["wind_avg"],
+                wind_gust=data["wind_gust"],
+            )
+            
+            return entity_data
+        return None
 
     def build_endpoint(self, data_fields) -> str:
         """Builds the Data End Point."""
