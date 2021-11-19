@@ -20,7 +20,7 @@ pip install pymeteobridgedata
 
 This library is primarily designed to be used in an async context.
 
-The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClient`. This interface takes 4 options:
+The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClient`. This interface takes 5 options:
 
 * `username`: (required) The username to login to your Meteobridge device. Default this *meteobridge*.
 * `password`: (required) The password for your meteobridge device.
