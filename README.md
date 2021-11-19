@@ -10,7 +10,7 @@ When this is done, it will replace the previous module [`pymeteobridgeio`](https
 
 ## Install
 
-`pymeteobridgedata` is avaible on PyPi:
+`pymeteobridgedata` is avaible on [PyPi](https://pypi.org/project/pymeteobridgedata/):
 
 ```bash
 pip install pymeteobridgedata
