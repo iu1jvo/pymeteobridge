@@ -7,10 +7,10 @@ import ast
 import logging
 from typing import Optional
 
-from pymeteobridge.data import ObservationDescription, StationDescription
+from pymeteobridge.data import ObservationDescription, StationDescription, BeaufortDescription
 from pymeteobridge.const import FIELDS_OBSERVATION, FIELDS_STATION, UNIT_TYPE_METRIC, VALID_UNIT_TYPES
 from pymeteobridge.exceptions import  Invalid,  BadRequest, NotAuthorized
-from pymeteobridge.helpers import Conversions
+from pymeteobridge.helpers import Conversions, Calculations
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ class MeteobridgeApiClient:
             session = aiohttp.ClientSession()
         self.req = session
         self.cnv = Conversions(self.units, self.homeassistant)
+        self.calc = Calculations()
 
         self.base_url = f"http://{self.username}:{self.password}@{self.ip_address}/cgi-bin/template.cgi?template="
         self._station_data: StationDescription = None
@@ -82,68 +83,75 @@ class MeteobridgeApiClient:
         data = await self._api_request(endpoint)
 
         if data is not None:
+            beaufort: BeaufortDescription = self.calc.beaufort(data["windspeedavg"])
             entity_data = ObservationDescription(
                 key=self._station_data.key,
-                timestamp=data["timestamp"],
-                temperature=data["temperature"],
-                pressure=data["pressure"],
+                timestamp=self.cnv.utc_from_timestamp(data["timestamp"]),
+                temperature=self.cnv.temperature(data["temperature"]),
+                is_freezing=self.calc.is_freezing(data["temperature"]),
+                pressure=self.cnv.pressure(data["pressure"]),
                 air_pollution=data["air_pm_10"],
                 air_pm_25=data["air_pm_25"],
                 air_pm_1=data["air_pm_1"],
-                heatindex=data["heatindex"],
+                heatindex=self.cnv.temperature(data["heatindex"]),
                 humidity=data["humidity"],
-                windspeedavg=data["windspeedavg"],
-                windgust=data["windgust"],
-                windchill=data["windchill"],
+                windspeedavg=self.cnv.windspeed(data["windspeedavg"]),
+                windgust=self.cnv.windspeed(data["windgust"]),
+                windchill=self.cnv.temperature(data["windchill"]),
                 windbearing=data["windbearing"],
-                raintoday=data["raintoday"],
-                rainrate=data["rainrate"],
-                dewpoint=data["dewpoint"],
+                wind_cardinal=self.calc.wind_direction(data["windbearing"]),
+                raintoday=self.cnv.rain(data["raintoday"]),
+                rainrate=self.cnv.rain(data["rainrate"]),
+                is_raining=self.calc.is_raining(data["rainrate"]),
+                dewpoint=self.cnv.temperature(data["dewpoint"]),
                 is_lowbat=True if data["is_lowbat"] == 1 else False,
-                in_temperature=data["in_temperature"],
+                in_temperature=self.cnv.temperature(data["in_temperature"]),
                 in_humidity=data["in_humidity"],
-                temphigh=data["temphigh"],
-                templow=data["templow"],
+                temphigh=self.cnv.temperature(data["temphigh"]),
+                templow=self.cnv.temperature(data["templow"]),
                 uvindex=data["uvindex"],
                 solarrad=data["solarrad"],
-                temp_month_min=data["temp_month_min"],
-                temp_month_max=data["temp_month_max"],
-                temp_year_min=data["temp_year_min"],
-                wind_month_max=data["wind_month_max"],
-                wind_year_max=data["wind_year_max"],
-                rain_month_max=data["rain_month_max"],
-                rain_year_max=data["rain_year_max"],
-                rainrate_month_max=data["rainrate_month_max"],
-                rainrate_year_max=data["rainrate_year_max"],
+                temp_month_min=self.cnv.temperature(data["temp_month_min"]),
+                temp_month_max=self.cnv.temperature(data["temp_month_max"]),
+                temp_year_min=self.cnv.temperature(data["temp_year_min"]),
+                wind_month_max=self.cnv.windspeed(data["wind_month_max"]),
+                wind_year_max=self.cnv.windspeed(data["wind_year_max"]),
+                rain_month_max=self.cnv.rain(data["rain_month_max"]),
+                rain_year_max=self.cnv.rain(data["rain_year_max"]),
+                rainrate_month_max=self.cnv.rain(data["rainrate_month_max"]),
+                rainrate_year_max=self.cnv.rain(data["rainrate_year_max"]),
                 lightning_count=data["lightning_count"],
                 lightning_energy=data["lightning_energy"],
                 lightning_distance=data["lightning_distance"],
-                bft_value=data["bft_value"],
+                bft_value=beaufort.value,
+                beaufort_description=beaufort.description,
                 trend_temperature=data["trend_temperature"],
+                temperature_trend=self.calc.trend_description(data["trend_temperature"]),
                 trend_pressure=data["trend_pressure"],
-                absolute_pressure=data["absolute_pressure"],
+                pressure_trend=self.calc.trend_description(data["trend_pressure"]),
+                absolute_pressure=self.cnv.pressure(data["absolute_pressure"]),
                 forecast=data["forecast"],
-                temperature_2=data["temperature_2"],
+                temperature_2=self.cnv.temperature(data["temperature_2"]),
                 humidity_2=data["humidity_2"],
-                heatindex_2=data["heatindex_2"],
-                temperature_3=data["temperature_3"],
+                heatindex_2=self.cnv.temperature(data["heatindex_2"]),
+                temperature_3=self.cnv.temperature(data["temperature_3"]),
                 humidity_3=data["humidity_3"],
-                heatindex_3=data["heatindex_3"],
-                temperature_4=data["temperature_4"],
+                heatindex_3=self.cnv.temperature(data["heatindex_3"]),
+                temperature_4=self.cnv.temperature(data["temperature_4"]),
                 humidity_4=data["humidity_4"],
-                heatindex_4=data["heatindex_4"],
-                temperature_5=data["temperature_5"],
+                heatindex_4=self.cnv.temperature(data["heatindex_4"]),
+                temperature_5=self.cnv.temperature(data["temperature_5"]),
                 humidity_5=data["humidity_5"],
-                heatindex_5=data["heatindex_5"],
-                temperature_6=data["temperature_6"],
+                heatindex_5=self.cnv.temperature(data["heatindex_5"]),
+                temperature_6=self.cnv.temperature(data["temperature_6"]),
                 humidity_6=data["humidity_6"],
-                heatindex_6=data["heatindex_6"],
-                temperature_7=data["temperature_7"],
+                heatindex_6=self.cnv.temperature(data["heatindex_6"]),
+                temperature_7=self.cnv.temperature(data["temperature_7"]),
                 humidity_7=data["humidity_7"],
-                heatindex_7=data["heatindex_7"],
-                temperature_8=data["temperature_8"],
+                heatindex_7=self.cnv.temperature(data["heatindex_7"]),
+                temperature_8=self.cnv.temperature(data["temperature_8"]),
                 humidity_8=data["humidity_8"],
-                heatindex_8=data["heatindex_8"],
+                heatindex_8=self.cnv.temperature(data["heatindex_8"]),
                 
             )
 

@@ -35,10 +35,13 @@ class ObservationDescription:
     windgust: float | None = None
     windspeed: float | None = None
     windbearing: int | None = None
+    wind_cardinal: str | None = None
     raintoday: float | None = None
     rainrate: float | None = None
     dewpoint: float | None = None
     is_lowbat: bool | None = None
+    is_raining: bool | None = None
+    is_freezing: bool | None = None
     in_temperature: float | None = None
     in_humidity: int | None = None
     temphigh: float | None = None
@@ -59,8 +62,11 @@ class ObservationDescription:
     lightning_energy: float | None = None
     lightning_distance: float | None = None
     bft_value: int | None = None
+    beaufort_description: str | None = None
     trend_temperature: float | None = None
+    temperature_trend: str | None = None
     trend_pressure: float | None = None
+    pressure_trend: str | None = None
     absolute_pressure: float | None = None
     forecast: str | None = None
     temperature_2: float | None = None
@@ -84,3 +90,11 @@ class ObservationDescription:
     temperature_8: float | None = None
     humidity_8: float | None = None
     heatindex_8: float | None = None
+
+
+@dataclass
+class BeaufortDescription:
+    """A class that describes beaufort values."""
+
+    value: int
+    description: str
