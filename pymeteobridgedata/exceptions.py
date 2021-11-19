@@ -1,4 +1,4 @@
-"""pymeteobridge exception definitions."""
+"""pymeteobridgedata exception definitions."""
 
 
 class MeteobridgeError(Exception):

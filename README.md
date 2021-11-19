@@ -1,6 +1,6 @@
 # Python Wrapper for Meteobridge Datalogger
 
-![Latest PyPI version](https://img.shields.io/pypi/v/pymeteobridge) ![Supported Python](https://img.shields.io/pypi/pyversions/pymeteobridge)
+![Latest PyPI version](https://img.shields.io/pypi/v/pymeteobridgedata) ![Supported Python](https://img.shields.io/pypi/pyversions/pymeteobridgedata)
 
 This module communicates with a [Meteobridge Datalogger](https://www.meteobridge.com/wiki/index.php/Home) using a [their Template Script](https://www.meteobridge.com/wiki/index.php/Add-On_Services).
 
@@ -10,17 +10,17 @@ When this is done, it will replace the previous module [`pymeteobridgeio`](https
 
 ## Install
 
-`pymeteobridge` is avaible on PyPi:
+`pymeteobridgedata` is avaible on PyPi:
 
 ```bash
-pip install pymeteobridge
+pip install pymeteobridgedata
 ```
 
 ## Usage
 
 This library is primarily designed to be used in an async context.
 
-The main interface for the library is the `pymeteobridge.MeteobridgeApiClient`. This interface takes 4 options:
+The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClient`. This interface takes 4 options:
 
 * `username`: (required) The username to login to your Meteobridge device. Default this *meteobridge*.
 * `password`: (required) The password for your meteobridge device.
@@ -35,8 +35,8 @@ import asyncio
 import logging
 import time
 
-from pymeteobridge import MeteobridgeApiClient, Invalid, NotAuthorized, BadRequest
-from pymeteobridge.data import DataLoggerDescription, ObservationDescription
+from pymeteobridgedata import MeteobridgeApiClient, Invalid, NotAuthorized, BadRequest
+from pymeteobridgedata.data import DataLoggerDescription, ObservationDescription
 
 _LOGGER = logging.getLogger(__name__)
 

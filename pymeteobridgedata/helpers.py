@@ -5,8 +5,8 @@ import datetime as dt
 import logging
 import math
 
-from pymeteobridge.const import UNIT_TYPE_METRIC
-from pymeteobridge.data import BeaufortDescription
+from pymeteobridgedata.const import UNIT_TYPE_METRIC
+from pymeteobridgedata.data import BeaufortDescription
 
 UTC = dt.timezone.utc
 

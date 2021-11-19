@@ -1,4 +1,4 @@
-"""System Wide Constants for pymeteobridge."""
+"""System Wide Constants for pymeteobridgedata."""
 from __future__ import annotations
 
 FIELDS_OBSERVATION = [

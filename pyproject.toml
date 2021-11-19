@@ -151,7 +151,7 @@ norecursedirs = [
     "testing_config",
     ".tox",
 ]
-addopts = "--cov=pymeteobridge --cov-append"
+addopts = "--cov=pymeteobridgeio --cov-append"
 
 [tool.flake8]
 exclude = ".eggs, .git, .tox, dist"

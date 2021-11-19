@@ -8,19 +8,19 @@ from typing import Optional
 import aiohttp
 from aiohttp import client_exceptions
 
-from pymeteobridge.const import (
+from pymeteobridgedata.const import (
     FIELDS_OBSERVATION,
     FIELDS_STATION,
     UNIT_TYPE_METRIC,
     VALID_UNIT_TYPES,
 )
-from pymeteobridge.data import (
+from pymeteobridgedata.data import (
     BeaufortDescription,
     ObservationDescription,
     DataLoggerDescription,
 )
-from pymeteobridge.exceptions import BadRequest
-from pymeteobridge.helpers import Calculations, Conversions
+from pymeteobridgedata.exceptions import BadRequest
+from pymeteobridgedata.helpers import Calculations, Conversions
 
 _LOGGER = logging.getLogger(__name__)
 
