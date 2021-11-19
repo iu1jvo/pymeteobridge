@@ -118,9 +118,18 @@ class Calculations:
             return "falling"
         return "steady"
 
-    def visibility(self, elevation, air_temperature, relative_humidity, dewpoint) -> float:
+    def visibility(
+        self,
+        elevation,
+        air_temperature,
+        relative_humidity,
+        dewpoint
+    ) -> float:
         """Return calculated visibility."""
-        if elevation is None or air_temperature is None or relative_humidity is None or dewpoint is None:
+        if (elevation is None
+                or air_temperature is None
+                or relative_humidity is None
+                or dewpoint is None):
             return None
 
         elevation_min = float(2)

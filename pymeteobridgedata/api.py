@@ -55,7 +55,8 @@ class MeteobridgeApiClient:
         self.cnv = Conversions(self.units, self.homeassistant)
         self.calc = Calculations()
 
-        self.base_url = f"http://{self.username}:{self.password}@{self.ip_address}/cgi-bin/template.cgi?template="
+        self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
+                         "/cgi-bin/template.cgi?template=")
         self._device_data: DataLoggerDescription = None
 
     @property
@@ -86,7 +87,8 @@ class MeteobridgeApiClient:
     async def update_observations(self) -> None:
         """Update observation data."""
         if self._device_data is None:
-            _LOGGER.error("Logger has not been initialized. Run initilaize() function first.")
+            _LOGGER.error("Logger has not been initialized. "
+                          "Run initilaize() function first.")
             return
 
         data_fields = self.build_endpoint(FIELDS_OBSERVATION)
