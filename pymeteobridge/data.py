@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class StationDescription:
+class DataLoggerDescription:
     """A class describing a stion configuration."""
 
     key: str

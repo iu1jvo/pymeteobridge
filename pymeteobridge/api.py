@@ -17,7 +17,7 @@ from pymeteobridge.const import (
 from pymeteobridge.data import (
     BeaufortDescription,
     ObservationDescription,
-    StationDescription,
+    DataLoggerDescription,
 )
 from pymeteobridge.exceptions import BadRequest
 from pymeteobridge.helpers import Calculations, Conversions
@@ -56,12 +56,12 @@ class MeteobridgeApiClient:
         self.calc = Calculations()
 
         self.base_url = f"http://{self.username}:{self.password}@{self.ip_address}/cgi-bin/template.cgi?template="
-        self._station_data: StationDescription = None
+        self._device_data: DataLoggerDescription = None
 
     @property
-    def station_data(self) -> StationDescription:
-        """Return Station Data."""
-        return self._station_data
+    def device_data(self) -> DataLoggerDescription:
+        """Return Device Data."""
+        return self._device_data
 
     async def initialize(self) -> None:
         """Initialize data tables."""
@@ -70,7 +70,7 @@ class MeteobridgeApiClient:
         data = await self._api_request(endpoint)
 
         if data is not None:
-            station_data = StationDescription(
+            device_data = DataLoggerDescription(
                 key=data["mac"],
                 mac=data["mac"],
                 swversion=data["swversion"],
@@ -80,12 +80,12 @@ class MeteobridgeApiClient:
                 uptime=data["uptime"],
                 ip=data["ip"],
             )
-            self._station_data = station_data
+            self._device_data = device_data
         return None
 
     async def update_observations(self) -> None:
         """Update observation data."""
-        if self._station_data is None:
+        if self._device_data is None:
             _LOGGER.error("Logger has not been initialized. Run initilaize() function first.")
             return
 
@@ -96,7 +96,7 @@ class MeteobridgeApiClient:
         if data is not None:
             beaufort: BeaufortDescription = self.calc.beaufort(data["windspeedavg"])
             entity_data = ObservationDescription(
-                key=self._station_data.key,
+                key=self._device_data.key,
                 timestamp=self.cnv.utc_from_timestamp(data["timestamp"]),
                 temperature=self.cnv.temperature(data["temperature"]),
                 is_freezing=self.calc.is_freezing(data["temperature"]),
