@@ -1,25 +1,36 @@
 """Meteobridge Data Wrapper."""
 from __future__ import annotations
 
-import aiohttp
-from aiohttp import client_exceptions
 import ast
 import logging
 from typing import Optional
 
-from pymeteobridge.data import ObservationDescription, StationDescription, BeaufortDescription
-from pymeteobridge.const import FIELDS_OBSERVATION, FIELDS_STATION, UNIT_TYPE_METRIC, VALID_UNIT_TYPES
-from pymeteobridge.exceptions import  Invalid,  BadRequest, NotAuthorized
-from pymeteobridge.helpers import Conversions, Calculations
+import aiohttp
+from aiohttp import client_exceptions
+
+from pymeteobridge.const import (
+    FIELDS_OBSERVATION,
+    FIELDS_STATION,
+    UNIT_TYPE_METRIC,
+    VALID_UNIT_TYPES,
+)
+from pymeteobridge.data import (
+    BeaufortDescription,
+    ObservationDescription,
+    StationDescription,
+)
+from pymeteobridge.exceptions import BadRequest
+from pymeteobridge.helpers import Calculations, Conversions
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class MeteobridgeApiClient:
     """Base Class for the Meteobridge API."""
 
     req: aiohttp.ClientSession
 
-    def __init__ (
+    def __init__(
         self,
         username: str,
         password: str,
@@ -28,6 +39,7 @@ class MeteobridgeApiClient:
         homeassistant: Optional(bool) = True,
         session: Optional[aiohttp.ClientSession] = None,
     ) -> None:
+        """Initialize api class."""
         self.username = username
         self.password = password
         self.ip_address = ip_address
@@ -48,12 +60,11 @@ class MeteobridgeApiClient:
 
     @property
     def station_data(self) -> StationDescription:
-        """Returns Station Data."""
+        """Return Station Data."""
         return self._station_data
 
     async def initialize(self) -> None:
         """Initialize data tables."""
-
         data_fields = self.build_endpoint(FIELDS_STATION)
         endpoint = f"{self.base_url}{data_fields}"
         data = await self._api_request(endpoint)
@@ -152,15 +163,13 @@ class MeteobridgeApiClient:
                 temperature_8=self.cnv.temperature(data["temperature_8"]),
                 humidity_8=data["humidity_8"],
                 heatindex_8=self.cnv.temperature(data["heatindex_8"]),
-                
             )
 
             return entity_data
         return None
 
     def build_endpoint(self, data_fields) -> str:
-        """Builds the Data End Point."""
-
+        """Build Data End Point."""
         parameters = "{"
         for item in data_fields:
             enc = "'" if item[2] == "str" else ""
@@ -171,10 +180,7 @@ class MeteobridgeApiClient:
 
         return parameters
 
-    async def _api_request(
-        self,
-        url: str
-        ) -> None:
+    async def _api_request(self, url: str) -> None:
         """Get data from Meteobridge API."""
         try:
             async with self.req.get(url) as resp:

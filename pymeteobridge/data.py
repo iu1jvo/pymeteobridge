@@ -1,7 +1,8 @@
-"""Dataclasses for pymeteobridge"""
+"""Dataclasses for pymeteobridge."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
 
 @dataclass
 class StationDescription:
@@ -15,7 +16,8 @@ class StationDescription:
     timezone: str | None = None
     uptime: int | None = None
     ip: str | None = None
-    
+
+
 @dataclass
 class ObservationDescription:
     """A class describing realtime weather data."""
