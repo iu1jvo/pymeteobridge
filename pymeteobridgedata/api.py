@@ -58,6 +58,7 @@ class MeteobridgeApiClient:
         self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
                          "/cgi-bin/template.cgi?template=")
         self._device_data: DataLoggerDescription = None
+        self._is_metric = self.units is UNIT_TYPE_METRIC
 
     @property
     def device_data(self) -> DataLoggerDescription:
@@ -169,6 +170,28 @@ class MeteobridgeApiClient:
 
             return entity_data
         return None
+
+    async def load_unit_system(self) -> None:
+        """Returns unit of meassurement based on unit system"""
+        density_unit = "kg/m^3" if self._is_metric else "lb/ft^3"
+        distance_unit = "km" if self._is_metric else "mi"
+        length_unit = "m/s" if self._is_metric else "mi/h"
+        length_km_unit = "km/h" if self._is_metric else "mi/h"
+        pressure_unit = "hPa" if self._is_metric else "inHg"
+        precip_unit = "mm" if self._is_metric else "in"
+
+        units_list = {
+            "none": None,
+            "density": density_unit,
+            "distance": distance_unit,
+            "length": length_unit,
+            "length_km": length_km_unit,
+            "pressure": pressure_unit,
+            "precipitation": precip_unit,
+            "precipitation_rate": f"{precip_unit}/h",
+        }
+
+        return units_list
 
     def build_endpoint(self, data_fields) -> str:
         """Build Data End Point."""
