@@ -11,6 +11,8 @@ from aiohttp import client_exceptions
 from pymeteobridgedata.const import (
     FIELDS_OBSERVATION,
     FIELDS_STATION,
+    FIELDS_TEST,
+    FIELDS_TEST_2,
     UNIT_TYPE_METRIC,
     VALID_UNIT_TYPES,
 )
@@ -171,6 +173,16 @@ class MeteobridgeApiClient:
             return entity_data
         return None
 
+    async def speed_test(self) -> None:
+        """Perform Speed Test."""
+
+        _LOGGER.debug("FIELD COUNT: %s", len(FIELDS_TEST_2))
+        data_fields = self.build_endpoint(FIELDS_TEST_2)
+        endpoint = f"{self.base_url}{data_fields}"
+        data = await self._api_request(endpoint)
+
+        return data
+
     async def load_unit_system(self) -> None:
         """Returns unit of meassurement based on unit system"""
         density_unit = "kg/m^3" if self._is_metric else "lb/ft^3"
@@ -205,15 +217,21 @@ class MeteobridgeApiClient:
 
         return parameters
 
+
     async def _api_request(self, url: str) -> None:
         """Get data from Meteobridge API."""
+        _LOGGER.debug("GET Size: %s", len(url.encode('utf-8')))
         try:
             async with self.req.get(url) as resp:
                 resp.raise_for_status()
                 data = await resp.read()
                 decoded_content = data.decode("utf-8")
+                _LOGGER.debug("RESULT Size: %s", len(decoded_content.encode('utf-8')))
 
                 return ast.literal_eval(decoded_content)
 
         except client_exceptions.ClientError as err:
             raise BadRequest(f"Error requesting data from Meteobridge: {err}") from None
+
+    def utf8len(s):
+        return len(s.encode('utf-8'))
