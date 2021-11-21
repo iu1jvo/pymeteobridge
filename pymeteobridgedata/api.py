@@ -106,6 +106,11 @@ class MeteobridgeApiClient:
                 data["relative_humidity"],
                 data["dew_point"]
             )
+            feels_like = self.calc.feels_like(
+                data["air_temperature"],
+                data["relative_humidity"],
+                data["wind_gust"]
+            )
             beaufort_data: BeaufortDescription = self.calc.beaufort(data["wind_avg"])
             entity_data = ObservationDescription(
                 key=self._device_data.key,
@@ -131,6 +136,7 @@ class MeteobridgeApiClient:
                 lightning_strike_last_distance=data["lightning_strike_last_distance"],
                 heat_index=self.cnv.temperature(data["heat_index"]),
                 wind_chill=self.cnv.temperature(data["wind_chill"]),
+                feels_like=self.cnv.temperature(feels_like),
                 dew_point=self.cnv.temperature(data["dew_point"]),
                 trend_temperature=data["trend_temperature"],
                 temperature_trend=self.calc.trend_description(data["trend_temperature"]),

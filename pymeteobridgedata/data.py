@@ -49,6 +49,7 @@ class ObservationDescription:
     heat_index: float | None = None
     wind_chill: float | None = None
     dew_point: float | None = None
+    feels_like: float | None = None
     visibility: float | None = None
     trend_temperature: float | None = None
     temperature_trend: str | None = None

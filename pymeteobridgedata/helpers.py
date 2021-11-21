@@ -228,3 +228,14 @@ class Calculations:
             bft = BeaufortDescription(value=0, description="calm")
 
         return bft
+
+    def feels_like(self, temperature, humidity, windspeed):
+        """Calculates the feel like temperature."""
+        if temperature is None or humidity is None or windspeed is None:
+            return 0
+
+        e_value = (
+            humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
+        )
+        feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
+        return feelslike_c
