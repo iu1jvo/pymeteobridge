@@ -230,7 +230,7 @@ class Calculations:
         return bft
 
     def feels_like(self, temperature, humidity, windspeed) -> float:
-        """Calculates the feel like temperature."""
+        """Calculate the feel like temperature."""
         if temperature is None or humidity is None or windspeed is None:
             return 0
 
