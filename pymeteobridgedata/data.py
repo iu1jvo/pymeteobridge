@@ -32,7 +32,6 @@ class ObservationDescription:
     relative_humidity: int | None = None
     precip_accum_local_day: float | None = None
     precip_rate: float | None = None
-    precip_intensity: str | None = None
     wind_avg: float | None = None
     wind_direction: int | None = None
     wind_cardinal: str | None = None
