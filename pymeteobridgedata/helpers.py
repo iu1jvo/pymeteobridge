@@ -76,6 +76,8 @@ class Conversions:
 
     def utc_from_timestamp(self, timestamp: int) -> dt.datetime:
         """Return UTC time from a timestamp."""
+        if timestamp is None:
+            return None
         return dt.datetime.utcfromtimestamp(timestamp).replace(tzinfo=UTC)
 
     def hw_platform(self, platform: str) -> str:

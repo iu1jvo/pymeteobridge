@@ -11,8 +11,6 @@ from aiohttp import client_exceptions
 from pymeteobridgedata.const import (
     FIELDS_OBSERVATION,
     FIELDS_STATION,
-    FIELDS_TEST,
-    FIELDS_TEST_2,
     UNIT_TYPE_METRIC,
     VALID_UNIT_TYPES,
 )
@@ -38,6 +36,7 @@ class MeteobridgeApiClient:
         password: str,
         ip_address: str,
         units: Optional[str] = UNIT_TYPE_METRIC,
+        extra_sensors: Optional[int] = 0,
         homeassistant: Optional(bool) = True,
         session: Optional[aiohttp.ClientSession] = None,
     ) -> None:
@@ -47,6 +46,7 @@ class MeteobridgeApiClient:
         self.ip_address = ip_address
         self.units = units
         self.homeassistant = homeassistant
+        self.extra_sensors = extra_sensors
 
         if self.units not in VALID_UNIT_TYPES:
             self.units = UNIT_TYPE_METRIC
@@ -69,7 +69,7 @@ class MeteobridgeApiClient:
 
     async def initialize(self) -> None:
         """Initialize data tables."""
-        data_fields = self.build_endpoint(FIELDS_STATION)
+        data_fields = self._build_endpoint(FIELDS_STATION)
         endpoint = f"{self.base_url}{data_fields}"
         data = await self._api_request(endpoint)
 
@@ -83,6 +83,7 @@ class MeteobridgeApiClient:
                 timezone=data["timezone"],
                 uptime=data["uptime"],
                 ip=data["ip"],
+                elevation=data["elevation"],
             )
             self._device_data = device_data
         return None
@@ -94,94 +95,71 @@ class MeteobridgeApiClient:
                           "Run initilaize() function first.")
             return
 
-        data_fields = self.build_endpoint(FIELDS_OBSERVATION)
+        data_fields = self._build_endpoint(FIELDS_OBSERVATION)
         endpoint = f"{self.base_url}{data_fields}"
         data = await self._api_request(endpoint)
 
         if data is not None:
-            beaufort: BeaufortDescription = self.calc.beaufort(data["windspeedavg"])
+            visibility = self.calc.visibility(
+                self._device_data.elevation,
+                data["air_temperature"],
+                data["relative_humidity"],
+                data["dew_point"]
+            )
+            beaufort_data: BeaufortDescription = self.calc.beaufort(data["wind_avg"])
             entity_data = ObservationDescription(
                 key=self._device_data.key,
-                timestamp=self.cnv.utc_from_timestamp(data["timestamp"]),
-                temperature=self.cnv.temperature(data["temperature"]),
-                is_freezing=self.calc.is_freezing(data["temperature"]),
-                pressure=self.cnv.pressure(data["pressure"]),
-                air_pollution=data["air_pm_10"],
-                air_pm_25=data["air_pm_25"],
-                air_pm_1=data["air_pm_1"],
-                heatindex=self.cnv.temperature(data["heatindex"]),
-                humidity=data["humidity"],
-                windspeedavg=self.cnv.windspeed(data["windspeedavg"]),
-                windgust=self.cnv.windspeed(data["windgust"]),
-                windchill=self.cnv.temperature(data["windchill"]),
-                windbearing=data["windbearing"],
-                wind_cardinal=self.calc.wind_direction(data["windbearing"]),
-                raintoday=self.cnv.rain(data["raintoday"]),
-                rainrate=self.cnv.rain(data["rainrate"]),
-                is_raining=self.calc.is_raining(data["rainrate"]),
-                dewpoint=self.cnv.temperature(data["dewpoint"]),
-                is_lowbat=True if data["is_lowbat"] == 1 else False,
-                in_temperature=self.cnv.temperature(data["in_temperature"]),
-                in_humidity=data["in_humidity"],
-                temphigh=self.cnv.temperature(data["temphigh"]),
-                templow=self.cnv.temperature(data["templow"]),
-                uvindex=data["uvindex"],
-                solarrad=data["solarrad"],
-                temp_month_min=self.cnv.temperature(data["temp_month_min"]),
-                temp_month_max=self.cnv.temperature(data["temp_month_max"]),
-                temp_year_min=self.cnv.temperature(data["temp_year_min"]),
-                wind_month_max=self.cnv.windspeed(data["wind_month_max"]),
-                wind_year_max=self.cnv.windspeed(data["wind_year_max"]),
-                rain_month_max=self.cnv.rain(data["rain_month_max"]),
-                rain_year_max=self.cnv.rain(data["rain_year_max"]),
-                rainrate_month_max=self.cnv.rain(data["rainrate_month_max"]),
-                rainrate_year_max=self.cnv.rain(data["rainrate_year_max"]),
-                lightning_count=data["lightning_count"],
-                lightning_energy=data["lightning_energy"],
-                lightning_distance=data["lightning_distance"],
-                bft_value=beaufort.value,
-                beaufort_description=beaufort.description,
+                utc_time=self.cnv.utc_from_timestamp(data["utc_time"]),
+                air_temperature=self.cnv.temperature(data["air_temperature"]),
+                sea_level_pressure=self.cnv.pressure(data["sea_level_pressure"]),
+                absolute_pressure=self.cnv.pressure(data["absolute_pressure"]),
+                relative_humidity=data["relative_humidity"],
+                precip_accum_local_day=self.cnv.rain(data["precip_accum_local_day"]),
+                precip_rate=self.cnv.rain(data["precip_rate"]),
+                wind_avg=self.cnv.windspeed(data["wind_avg"]),
+                wind_gust=self.cnv.windspeed(data["wind_gust"]),
+                wind_direction=data["wind_direction"],
+                wind_cardinal=self.calc.wind_direction(data["wind_direction"]),
+                beaufort=beaufort_data.value,
+                beaufort_description=beaufort_data.description,
+                uv=data["uv"],
+                uv_description=self.calc.uv_description(data["uv"]),
+                solar_radiation=data["solar_radiation"],
+                visibility=self.cnv.distance(visibility),
+                lightning_strike_last_epoch=self.cnv.utc_from_timestamp(data["lightning_strike_last_epoch"]),
+                lightning_strike_count=data["lightning_strike_count"],
+                lightning_strike_last_distance=data["lightning_strike_last_distance"],
+                heat_index=self.cnv.temperature(data["heat_index"]),
+                wind_chill=self.cnv.temperature(data["wind_chill"]),
+                dew_point=self.cnv.temperature(data["dew_point"]),
                 trend_temperature=data["trend_temperature"],
                 temperature_trend=self.calc.trend_description(data["trend_temperature"]),
                 trend_pressure=data["trend_pressure"],
                 pressure_trend=self.calc.trend_description(data["trend_pressure"]),
-                absolute_pressure=self.cnv.pressure(data["absolute_pressure"]),
+                air_pm_10=data["air_pm_10"],
+                air_pm_25=data["air_pm_25"],
+                air_pm_1=data["air_pm_1"],
                 forecast=data["forecast"],
-                temperature_2=self.cnv.temperature(data["temperature_2"]),
-                humidity_2=data["humidity_2"],
-                heatindex_2=self.cnv.temperature(data["heatindex_2"]),
-                temperature_3=self.cnv.temperature(data["temperature_3"]),
-                humidity_3=data["humidity_3"],
-                heatindex_3=self.cnv.temperature(data["heatindex_3"]),
-                temperature_4=self.cnv.temperature(data["temperature_4"]),
-                humidity_4=data["humidity_4"],
-                heatindex_4=self.cnv.temperature(data["heatindex_4"]),
-                temperature_5=self.cnv.temperature(data["temperature_5"]),
-                humidity_5=data["humidity_5"],
-                heatindex_5=self.cnv.temperature(data["heatindex_5"]),
-                temperature_6=self.cnv.temperature(data["temperature_6"]),
-                humidity_6=data["humidity_6"],
-                heatindex_6=self.cnv.temperature(data["heatindex_6"]),
-                temperature_7=self.cnv.temperature(data["temperature_7"]),
-                humidity_7=data["humidity_7"],
-                heatindex_7=self.cnv.temperature(data["heatindex_7"]),
-                temperature_8=self.cnv.temperature(data["temperature_8"]),
-                humidity_8=data["humidity_8"],
-                heatindex_8=self.cnv.temperature(data["heatindex_8"]),
+                is_freezing=self.calc.is_freezing(data["air_temperature"]),
+                is_raining=self.calc.is_raining(data["precip_rate"]),
+                is_lowbat=True if data["is_lowbat"] == 1 else False,
             )
 
+            if self.extra_sensors > 0:
+                extra_sensors = await self._get_extra_sensor_values()
+                sensor_num = 1
+                while sensor_num < self.extra_sensors + 1:
+                    temp_field = f"temperature_extra_{sensor_num}"
+                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                    hum_field = f"relative_humidity_extra_{sensor_num}"
+                    setattr(entity_data, hum_field, extra_sensors[hum_field])
+                    heat_field = f"heat_index_extra_{sensor_num}"
+                    setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
+                    sensor_num += 1
+
             return entity_data
+
         return None
-
-    async def speed_test(self) -> None:
-        """Perform Speed Test."""
-
-        _LOGGER.debug("FIELD COUNT: %s", len(FIELDS_TEST_2))
-        data_fields = self.build_endpoint(FIELDS_TEST_2)
-        endpoint = f"{self.base_url}{data_fields}"
-        data = await self._api_request(endpoint)
-
-        return data
 
     async def load_unit_system(self) -> None:
         """Returns unit of meassurement based on unit system"""
@@ -205,7 +183,47 @@ class MeteobridgeApiClient:
 
         return units_list
 
-    def build_endpoint(self, data_fields) -> str:
+    async def speed_test(self) -> None:
+        """Perform Speed Test."""
+
+        _LOGGER.debug("FIELD COUNT: %s", len(FIELDS_OBSERVATION))
+        data_fields = self._build_endpoint(FIELDS_OBSERVATION)
+        endpoint = f"{self.base_url}{data_fields}"
+        data = await self._api_request(endpoint)
+
+        return data
+
+    async def _get_extra_sensor_values(self) -> None:
+        """Return extra sensors if attached."""
+        if self.extra_sensors == 0:
+            return None
+
+        count = 0
+        sensor_array = []
+        while count < self.extra_sensors:
+            count += 1
+            item_array = []
+            item_array.append(f"temperature_extra_{count}")
+            item_array.append(f"th{count}temp-act:None")
+            item_array.append("float")
+            sensor_array.append(item_array)
+            item_array = []
+            item_array.append(f"relative_humidity_extra_{count}")
+            item_array.append(f"th{count}hum-act:None")
+            item_array.append("int")
+            sensor_array.append(item_array)
+            item_array = []
+            item_array.append(f"heat_index_extra_{count}")
+            item_array.append(f"th{count}heatindex-act.1:None")
+            item_array.append("float")
+            sensor_array.append(item_array)
+
+        data_fields = self._build_endpoint(sensor_array)
+        endpoint = f"{self.base_url}{data_fields}"
+        data = await self._api_request(endpoint)
+        return data
+
+    def _build_endpoint(self, data_fields) -> str:
         """Build Data End Point."""
         parameters = "{"
         for item in data_fields:
@@ -220,18 +238,13 @@ class MeteobridgeApiClient:
 
     async def _api_request(self, url: str) -> None:
         """Get data from Meteobridge API."""
-        _LOGGER.debug("GET Size: %s", len(url.encode('utf-8')))
         try:
             async with self.req.get(url) as resp:
                 resp.raise_for_status()
                 data = await resp.read()
                 decoded_content = data.decode("utf-8")
-                _LOGGER.debug("RESULT Size: %s", len(decoded_content.encode('utf-8')))
 
                 return ast.literal_eval(decoded_content)
 
         except client_exceptions.ClientError as err:
             raise BadRequest(f"Error requesting data from Meteobridge: {err}") from None
-
-    def utf8len(s):
-        return len(s.encode('utf-8'))
