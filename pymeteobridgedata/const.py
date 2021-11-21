@@ -5,7 +5,7 @@ FIELDS_OBSERVATION = [
     ["utc_time", "epoch", "int"],
     ["air_temperature", "th0temp-act:None", "float"],
     ["sea_level_pressure", "thb0seapress-act:None", "float"],
-    ["absolute_pressure", "thb0press-act:None", "float"],
+    ["station_pressure", "thb0press-act:None", "float"],
     ["relative_humidity", "th0hum-act:None", "int"],
     ["precip_rate", "rain0rate-act:None", "float"],
     ["precip_accum_local_day", "rain0total-daysum:None", "float"],

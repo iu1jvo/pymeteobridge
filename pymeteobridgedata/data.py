@@ -27,7 +27,7 @@ class ObservationDescription:
 
     utc_time: str | None = None
     air_temperature: float | None = None
-    absolute_pressure: float | None = None
+    station_pressure: float | None = None
     sea_level_pressure: float | None = None
     relative_humidity: int | None = None
     precip_accum_local_day: float | None = None

@@ -112,7 +112,7 @@ class MeteobridgeApiClient:
                 utc_time=self.cnv.utc_from_timestamp(data["utc_time"]),
                 air_temperature=self.cnv.temperature(data["air_temperature"]),
                 sea_level_pressure=self.cnv.pressure(data["sea_level_pressure"]),
-                absolute_pressure=self.cnv.pressure(data["absolute_pressure"]),
+                station_pressure=self.cnv.pressure(data["station_pressure"]),
                 relative_humidity=data["relative_humidity"],
                 precip_accum_local_day=self.cnv.rain(data["precip_accum_local_day"]),
                 precip_rate=self.cnv.rain(data["precip_rate"]),
