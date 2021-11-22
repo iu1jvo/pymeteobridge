@@ -3,12 +3,12 @@ from __future__ import annotations
 
 import ast
 import logging
-from typing import Optional
+from typing import List, Optional
 
-import aiohttp
-from aiohttp import client_exceptions
+from aiohttp import ClientSession, ClientTimeout, client_exceptions
 
 from pymeteobridgedata.const import (
+    DEFAULT_TIMEOUT,
     FIELDS_OBSERVATION,
     FIELDS_STATION,
     UNIT_TYPE_METRIC,
@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 class MeteobridgeApiClient:
     """Base Class for the Meteobridge API."""
 
-    req: aiohttp.ClientSession
+    req: ClientSession
 
     def __init__(
         self,
@@ -38,7 +38,7 @@ class MeteobridgeApiClient:
         units: Optional[str] = UNIT_TYPE_METRIC,
         extra_sensors: Optional[int] = 0,
         homeassistant: Optional(bool) = True,
-        session: Optional[aiohttp.ClientSession] = None,
+        session: Optional[ClientSession] = None,
     ) -> None:
         """Initialize api class."""
         self.username = username
@@ -52,8 +52,9 @@ class MeteobridgeApiClient:
             self.units = UNIT_TYPE_METRIC
 
         if session is None:
-            session = aiohttp.ClientSession()
+            session = ClientSession()
         self.req = session
+
         self.cnv = Conversions(self.units, self.homeassistant)
         self.calc = Calculations()
 
@@ -71,7 +72,8 @@ class MeteobridgeApiClient:
         """Initialize data tables."""
         data_fields = self._build_endpoint(FIELDS_STATION)
         endpoint = f"{self.base_url}{data_fields}"
-        data = await self._api_request(endpoint)
+        result = await self._async_request("get", endpoint)
+        data = await self._process_request_result(result, FIELDS_STATION)
 
         if data is not None:
             device_data = DataLoggerDescription(
@@ -97,7 +99,8 @@ class MeteobridgeApiClient:
 
         data_fields = self._build_endpoint(FIELDS_OBSERVATION)
         endpoint = f"{self.base_url}{data_fields}"
-        data = await self._api_request(endpoint)
+        result = await self._async_request("get", endpoint)
+        data = await self._process_request_result(result, FIELDS_OBSERVATION)
 
         if data is not None:
             visibility = self.calc.visibility(
@@ -148,6 +151,18 @@ class MeteobridgeApiClient:
                 air_pm_25=data["air_pm_25"],
                 air_pm_1=data["air_pm_1"],
                 forecast=data["forecast"],
+                air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
+                air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
+                air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),
+                air_temperature_dmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_dmaxtime"]),
+                air_temperature_mmin=self.cnv.temperature(data["air_temperature_mmin"]),
+                air_temperature_mmintime=self.cnv.utc_from_mbtime(data["air_temperature_mmintime"]),
+                air_temperature_mmax=self.cnv.temperature(data["air_temperature_mmax"]),
+                air_temperature_mmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_mmaxtime"]),
+                air_temperature_ymin=self.cnv.temperature(data["air_temperature_ymin"]),
+                air_temperature_ymintime=self.cnv.utc_from_mbtime(data["air_temperature_ymintime"]),
+                air_temperature_ymax=self.cnv.temperature(data["air_temperature_ymax"]),
+                air_temperature_ymaxtime=self.cnv.utc_from_mbtime(data["air_temperature_ymaxtime"]),
                 is_freezing=self.calc.is_freezing(data["air_temperature"]),
                 is_raining=self.calc.is_raining(data["precip_rate"]),
                 is_lowbat=True if data["is_lowbat"] == 1 else False,
@@ -193,13 +208,13 @@ class MeteobridgeApiClient:
 
     async def speed_test(self) -> None:
         """Perform Speed Test."""
-
         _LOGGER.debug("FIELD COUNT: %s", len(FIELDS_OBSERVATION))
         data_fields = self._build_endpoint(FIELDS_OBSERVATION)
         endpoint = f"{self.base_url}{data_fields}"
-        data = await self._api_request(endpoint)
+        data = await self._async_request("get", endpoint)
+        result = await self._process_request_result(data, FIELDS_OBSERVATION)
 
-        return data
+        return result
 
     async def _get_extra_sensor_values(self) -> None:
         """Return extra sensors if attached."""
@@ -228,31 +243,61 @@ class MeteobridgeApiClient:
 
         data_fields = self._build_endpoint(sensor_array)
         endpoint = f"{self.base_url}{data_fields}"
-        data = await self._api_request(endpoint)
+        result = await self._async_request("get", endpoint)
+        data = await self._process_request_result(result, sensor_array)
         return data
 
     def _build_endpoint(self, data_fields) -> str:
         """Build Data End Point."""
-        parameters = "{"
+        parameters = ""
         for item in data_fields:
-            enc = "'" if item[2] == "str" else ""
-            parameters += f"'{item[0]}':+{enc}[{item[1]}]{enc},+"
+            parameters += f"[{item[1]}];"
 
-        parameters = parameters[0:-2]
-        parameters += "}+&contenttype=text/plain;charset=iso-8859-1"
+        parameters = parameters[0:-1]
+        parameters += "&contenttype=text/plain;charset=iso-8859-1"
 
         return parameters
 
+    async def _process_request_result(self, result: str, data_fields) -> List:
+        """Process result from Request."""
+        if result is None:
+            return None
 
-    async def _api_request(self, url: str) -> None:
-        """Get data from Meteobridge API."""
+        items = result.split(";")
+        data = "{"
+        index = 0
+        for data_field in data_fields:
+            enc = "'" if data_field[2] == "str" else ""
+            data += f"'{data_field[0]}': {enc}{items[index]}{enc}, "
+            index += 1
+        data = data[0:-2]
+        data += "}"
+
+        return ast.literal_eval(data)
+
+    async def _async_request(
+        self,
+        method: str,
+        endpoint: str,
+    ) -> dict:
+        """Make a request against the SmartWeather API."""
+        use_running_session = self.req and not self.req.closed
+
+        if use_running_session:
+            session = self.req
+        else:
+            session = ClientSession(timeout=ClientTimeout(total=DEFAULT_TIMEOUT))
+
         try:
-            async with self.req.get(url) as resp:
+            async with session.request(method, endpoint) as resp:
                 resp.raise_for_status()
                 data = await resp.read()
                 decoded_content = data.decode("utf-8")
-
-                return ast.literal_eval(decoded_content)
+                return decoded_content
 
         except client_exceptions.ClientError as err:
             raise BadRequest(f"Error requesting data from Meteobridge: {err}") from None
+
+        finally:
+            if not use_running_session:
+                await session.close()

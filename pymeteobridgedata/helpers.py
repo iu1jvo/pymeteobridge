@@ -86,6 +86,13 @@ class Conversions:
             return None
         return dt.datetime.utcfromtimestamp(timestamp).replace(tzinfo=UTC)
 
+    def utc_from_mbtime(self, timestamp: str) -> dt.datetime:
+        """Return UTC time from a Metobridge timestamp."""
+        if timestamp is None:
+            return None
+        dt_obj = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
+        return dt_obj.replace(tzinfo=UTC)
+
     def hw_platform(self, platform: str) -> str:
         """Return the meteobridge HW Platform."""
         if platform is None:

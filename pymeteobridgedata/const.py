@@ -1,6 +1,8 @@
 """System Wide Constants for pymeteobridgedata."""
 from __future__ import annotations
 
+DEFAULT_TIMEOUT = 10
+
 FIELDS_OBSERVATION = [
     ["utc_time", "epoch", "int"],
     ["air_temperature", "th0temp-act:None", "float"],
@@ -27,6 +29,18 @@ FIELDS_OBSERVATION = [
     ["air_pm_1", "air2pm-act:None", "float"],
     ["is_lowbat", "th0lowbat-act.0:None", "int"],
     ["forecast", "forecast-text:None", "str"],
+    ["air_temperature_dmin", "th0temp-dmin:None", "float"],
+    ["air_temperature_dmintime", "th0temp-dmintime=utc:None", "str"],
+    ["air_temperature_dmax", "th0temp-dmax:None", "float"],
+    ["air_temperature_dmaxtime", "th0temp-dmaxtime=utc:None", "str"],
+    ["air_temperature_mmin", "th0temp-mmin:None", "float"],
+    ["air_temperature_mmintime", "th0temp-mmintime=utc:None", "str"],
+    ["air_temperature_mmax", "th0temp-mmax:None", "float"],
+    ["air_temperature_mmaxtime", "th0temp-mmaxtime=utc:None", "str"],
+    ["air_temperature_ymin", "th0temp-ymin:None", "float"],
+    ["air_temperature_ymintime", "th0temp-ymintime=utc:None", "str"],
+    ["air_temperature_ymax", "th0temp-ymax:None", "float"],
+    ["air_temperature_ymaxtime", "th0temp-ymaxtime=utc:None", "str"],
 ]
 
 FIELDS_STATION = [
