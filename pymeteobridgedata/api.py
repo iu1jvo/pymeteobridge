@@ -109,7 +109,9 @@ class MeteobridgeApiClient:
             feels_like = self.calc.feels_like(
                 data["air_temperature"],
                 data["relative_humidity"],
-                data["wind_gust"]
+                data["wind_gust"],
+                data["heat_index"],
+                data["wind_chill"]
             )
             beaufort_data: BeaufortDescription = self.calc.beaufort(data["wind_avg"])
             entity_data = ObservationDescription(

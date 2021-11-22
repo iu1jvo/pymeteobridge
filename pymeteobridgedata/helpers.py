@@ -229,13 +229,26 @@ class Calculations:
 
         return bft
 
-    def feels_like(self, temperature, humidity, windspeed) -> float:
+    def feels_like(
+        self,
+        air_temperature,
+        relative_humidity,
+        wind_gust,
+        heat_index,
+        wind_chill
+    ) -> float:
         """Calculate the feel like temperature."""
-        if temperature is None or humidity is None or windspeed is None:
-            return 0
+        if (air_temperature is None
+                or relative_humidity is None
+                or wind_gust is None
+                or heat_index is None
+                or wind_chill is None):
+            return None
 
-        e_value = (
-            humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
-        )
-        feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
-        return round(feelslike_c, 1)
+        if air_temperature >= 26.67 and relative_humidity >= 40:
+            return heat_index
+
+        if air_temperature <= 10 and wind_gust >= 1.34:
+            return wind_chill
+
+        return air_temperature
