@@ -23,12 +23,18 @@ class Conversions:
 
     def temperature(self, value) -> float:
         """Return celcius to Fahrenheit."""
+        if value is None:
+            return None
+
         if value is None or self.units == UNIT_TYPE_METRIC or self.homeassistant:
             return round(value, 1)
         return round(value * 1.8 + 32, 1)
 
     def pressure(self, value) -> float:
         """Return inHg from mb/hPa."""
+        if value is None:
+            return None
+
         if value is None or self.units == UNIT_TYPE_METRIC:
             return value
         return round(value * 0.029530, 1)

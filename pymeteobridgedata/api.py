@@ -16,8 +16,8 @@ from pymeteobridgedata.const import (
 )
 from pymeteobridgedata.data import (
     BeaufortDescription,
-    ObservationDescription,
     DataLoggerDescription,
+    ObservationDescription,
 )
 from pymeteobridgedata.exceptions import BadRequest
 from pymeteobridgedata.helpers import Calculations, Conversions
