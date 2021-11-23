@@ -6,8 +6,6 @@ This module communicates with a [Meteobridge Datalogger](https://www.meteobridge
 
 The module is primarily written for the purpose of being used in Home Assistant for the Custom Integration called `meteobridge` but might be used for other purposes also.
 
-When this is done, it will replace the previous module [`pymeteobridgeio`](https://github.com/briis/pymeteobridgeio)
-
 ## Install
 
 `pymeteobridgedata` is avaible on [PyPi](https://pypi.org/project/pymeteobridgedata/):
