@@ -187,7 +187,7 @@ class MeteobridgeApiClient:
         return None
 
     async def load_unit_system(self) -> None:
-        """Returns unit of meassurement based on unit system"""
+        """Return unit of meassurement based on unit system."""
         density_unit = "kg/m^3" if self._is_metric else "lb/ft^3"
         distance_unit = "km" if self._is_metric else "mi"
         length_unit = "m/s" if self._is_metric else "mi/h"
