@@ -234,7 +234,7 @@ class MeteobridgeApiClient:
             sensor_array.append(item_array)
             item_array = []
             item_array.append(f"relative_humidity_extra_{count}")
-            item_array.append(f"th{count}hum-act:None")
+            item_array.append(f"th{count}hum-act.0:None")
             item_array.append("int")
             sensor_array.append(item_array)
             item_array = []
