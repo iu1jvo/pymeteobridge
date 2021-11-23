@@ -151,6 +151,8 @@ class MeteobridgeApiClient:
                 air_pm_25=data["air_pm_25"],
                 air_pm_1=data["air_pm_1"],
                 forecast=data["forecast"],
+                indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
+                indoor_humidity=data["indoor_humidity"],
                 air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
                 air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
                 air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),

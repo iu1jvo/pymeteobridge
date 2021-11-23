@@ -29,6 +29,8 @@ FIELDS_OBSERVATION = [
     ["air_pm_1", "air2pm-act:None", "float"],
     ["is_lowbat", "th0lowbat-act.0:None", "int"],
     ["forecast", "forecast-text:None", "str"],
+    ["indoor_temperature", "thb0temp-act:None", "float"],
+    ["indoor_humidity", "thb0hum-act:None", "int"],
     ["air_temperature_dmin", "th0temp-dmin:None", "float"],
     ["air_temperature_dmintime", "th0temp-dmintime=utc:None", "str"],
     ["air_temperature_dmax", "th0temp-dmax:None", "float"],
