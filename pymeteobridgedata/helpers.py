@@ -90,8 +90,13 @@ class Conversions:
         """Return UTC time from a Metobridge timestamp."""
         if timestamp is None:
             return None
-        dt_obj = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
-        return dt_obj.replace(tzinfo=UTC)
+
+        try:
+            dt_obj = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
+            return dt_obj.replace(tzinfo=UTC)
+        except Exception as e:
+            _LOGGER.error("An error occured converting MB Time. Input Value is : %s and Error message is %s", timestamp, str(e))
+            return None
 
     def hw_platform(self, platform: str) -> str:
         """Return the meteobridge HW Platform."""
