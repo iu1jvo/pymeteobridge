@@ -88,7 +88,7 @@ class Conversions:
 
     def utc_from_mbtime(self, timestamp: str) -> dt.datetime:
         """Return UTC time from a Metobridge timestamp."""
-        if timestamp is None:
+        if timestamp is None or len(timestamp) == 0:
             return None
 
         try:
