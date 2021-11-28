@@ -176,6 +176,7 @@ class MeteobridgeApiClient:
 
             if self.extra_sensors > 0 or self.extra_soil_sensors or self.extra_leaf_sensors > 0:
                 extra_sensors = await self._get_extra_sensor_values()
+                _LOGGER.debug(extra_sensors)
                 sensor_num = 1
                 while sensor_num < self.extra_sensors + 1:
                     temp_field = f"temperature_extra_{sensor_num}"
