@@ -25,6 +25,8 @@ The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClien
 * `ip_address`: (required) IP Address of the Meteobridge device.
 * `units`: (optional) Valid options here are *metric* or *imperial*. Metebridge devices always deliver data in metric units, so conversion will only take place if if metric is not selected. Default value is **metric**
 * `extra_sensors`: (optional) Number of extra sensors attached to the Meteobridge Logger (Default is 0, max is 7)
+* `extra_soil_sensors`: (optional) Number of extra soilsensors attached to the Meteobridge Logger (Default is 0, max is 4)
+* `extra_leaf_sensors`: (optional) Number of extra sensors attached to the Meteobridge Logger (Default is 0, max is 4)
 * `homeassistant`: (optional) Valid options are *True* or *False*. If set to True, there will be some unit types that will not be converted, as Home Assistant will take care of that. Default value is **True**
 
 ### Example Python script

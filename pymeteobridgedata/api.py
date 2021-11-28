@@ -37,6 +37,8 @@ class MeteobridgeApiClient:
         ip_address: str,
         units: Optional[str] = UNIT_TYPE_METRIC,
         extra_sensors: Optional[int] = 0,
+        extra_soil_sensors: Optional[int] = 0,
+        extra_leaf_sensors: Optional[int] = 0,
         homeassistant: Optional(bool) = True,
         session: Optional[ClientSession] = None,
     ) -> None:
@@ -47,6 +49,8 @@ class MeteobridgeApiClient:
         self.units = units
         self.homeassistant = homeassistant
         self.extra_sensors = extra_sensors
+        self.extra_soil_sensors = extra_soil_sensors
+        self.extra_leaf_sensors = extra_leaf_sensors
 
         if self.units not in VALID_UNIT_TYPES:
             self.units = UNIT_TYPE_METRIC
@@ -170,7 +174,7 @@ class MeteobridgeApiClient:
                 is_lowbat=True if data["is_lowbat"] == 1 else False,
             )
 
-            if self.extra_sensors > 0:
+            if self.extra_sensors > 0 or self.extra_soil_sensors or self.extra_leaf_sensors > 0:
                 extra_sensors = await self._get_extra_sensor_values()
                 sensor_num = 1
                 while sensor_num < self.extra_sensors + 1:
@@ -180,6 +184,20 @@ class MeteobridgeApiClient:
                     setattr(entity_data, hum_field, extra_sensors[hum_field])
                     heat_field = f"heat_index_extra_{sensor_num}"
                     setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
+                    sensor_num += 1
+                sensor_num = 0
+                while sensor_num < self.extra_soil_sensors:
+                    temp_field = f"temperature_soil_{sensor_num}"
+                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                    hum_field = f"humidity_soil_{sensor_num}"
+                    setattr(entity_data, hum_field, extra_sensors[hum_field])
+                    sensor_num += 1
+                sensor_num = 0
+                while sensor_num < self.extra_leaf_sensors:
+                    temp_field = f"temperature_leaf_{sensor_num}"
+                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                    hum_field = f"humidity_leaf_{sensor_num}"
+                    setattr(entity_data, hum_field, extra_sensors[hum_field])
                     sensor_num += 1
 
             return entity_data
@@ -223,8 +241,8 @@ class MeteobridgeApiClient:
         if self.extra_sensors == 0:
             return None
 
-        count = 0
         sensor_array = []
+        count = 0
         while count < self.extra_sensors:
             count += 1
             item_array = []
@@ -242,6 +260,36 @@ class MeteobridgeApiClient:
             item_array.append(f"th{count}heatindex-act.1:None")
             item_array.append("float")
             sensor_array.append(item_array)
+
+        # Soil Sensors
+        count = 0
+        while count < self.extra_soil_sensors - 1:
+            item_array = []
+            item_array.append(f"temperature_soil_{count}")
+            item_array.append(f"soil{count}temp-act:None")
+            item_array.append("float")
+            sensor_array.append(item_array)
+            item_array = []
+            item_array.append(f"humidity_soil_{count}")
+            item_array.append(f"soil{count}hum-act.0:None")
+            item_array.append("int")
+            sensor_array.append(item_array)
+            count += 1
+
+        # Leaf Sensors
+        count = 0
+        while count < self.extra_leaf_sensors - 1:
+            item_array = []
+            item_array.append(f"temperature_leaf_{count}")
+            item_array.append(f"leaf{count}temp-act:None")
+            item_array.append("float")
+            sensor_array.append(item_array)
+            item_array = []
+            item_array.append(f"humidity_leaf_{count}")
+            item_array.append(f"leaf{count}hum-act.0:None")
+            item_array.append("int")
+            sensor_array.append(item_array)
+            count += 1
 
         data_fields = self._build_endpoint(sensor_array)
         endpoint = f"{self.base_url}{data_fields}"

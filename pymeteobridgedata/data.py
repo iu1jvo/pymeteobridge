@@ -96,6 +96,22 @@ class ObservationDescription:
     temperature_extra_7: float | None = None
     relative_humidity_extra_7: float | None = None
     heat_index_extra_7: float | None = None
+    temperature_soil_0: float | None = None
+    humidity_soil_0: float | None = None
+    temperature_soil_1: float | None = None
+    humidity_soil_1: float | None = None
+    temperature_soil_2: float | None = None
+    humidity_soil_2: float | None = None
+    temperature_soil_3: float | None = None
+    humidity_soil_3: float | None = None
+    temperature_leaf_0: float | None = None
+    humidity_leaf_0: float | None = None
+    temperature_leaf_1: float | None = None
+    humidity_leaf_1: float | None = None
+    temperature_leaf_2: float | None = None
+    humidity_leaf_2: float | None = None
+    temperature_leaf_3: float | None = None
+    humidity_leaf_3: float | None = None
 
 @dataclass
 class BeaufortDescription:
