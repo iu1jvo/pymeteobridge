@@ -185,15 +185,15 @@ class MeteobridgeApiClient:
                     heat_field = f"heat_index_extra_{sensor_num}"
                     setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
                     sensor_num += 1
-                sensor_num = 0
-                while sensor_num < self.extra_soil_sensors:
+                sensor_num = 1
+                while sensor_num < self.extra_soil_sensors + 1:
                     temp_field = f"temperature_soil_{sensor_num}"
                     setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
                     hum_field = f"humidity_soil_{sensor_num}"
                     setattr(entity_data, hum_field, extra_sensors[hum_field])
                     sensor_num += 1
-                sensor_num = 0
-                while sensor_num < self.extra_leaf_sensors:
+                sensor_num = 1
+                while sensor_num < self.extra_leaf_sensors + 1:
                     temp_field = f"temperature_leaf_{sensor_num}"
                     setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
                     hum_field = f"humidity_leaf_{sensor_num}"
@@ -263,7 +263,8 @@ class MeteobridgeApiClient:
 
         # Soil Sensors
         count = 0
-        while count < self.extra_soil_sensors - 1:
+        while count < self.extra_soil_sensors:
+            count += 1
             item_array = []
             item_array.append(f"temperature_soil_{count}")
             item_array.append(f"soil{count}temp-act:None")
@@ -274,11 +275,11 @@ class MeteobridgeApiClient:
             item_array.append(f"soil{count}hum-act.0:None")
             item_array.append("int")
             sensor_array.append(item_array)
-            count += 1
 
         # Leaf Sensors
         count = 0
-        while count < self.extra_leaf_sensors - 1:
+        while count < self.extra_leaf_sensors:
+            count += 1
             item_array = []
             item_array.append(f"temperature_leaf_{count}")
             item_array.append(f"leaf{count}temp-act:None")
@@ -289,7 +290,6 @@ class MeteobridgeApiClient:
             item_array.append(f"leaf{count}hum-act.0:None")
             item_array.append("int")
             sensor_array.append(item_array)
-            count += 1
 
         data_fields = self._build_endpoint(sensor_array)
         endpoint = f"{self.base_url}{data_fields}"
