@@ -43,6 +43,22 @@ FIELDS_OBSERVATION = [
     ["air_temperature_ymintime", "th0temp-ymintime=utc:None", "str"],
     ["air_temperature_ymax", "th0temp-ymax:None", "float"],
     ["air_temperature_ymaxtime", "th0temp-ymaxtime=utc:None", "str"],
+    ["temperature_soil_1", "soil0temp-act:None", "float"],
+    ["humidity_soil_1", "soil0hum-act.0:None", "int"],
+    ["temperature_soil_2", "soil1temp-act:None", "float"],
+    ["humidity_soil_2", "soil1hum-act.0:None", "int"],
+    ["temperature_soil_3", "soil2temp-act:None", "float"],
+    ["humidity_soil_3", "soil2hum-act.0:None", "int"],
+    ["temperature_soil_4", "soil3temp-act:None", "float"],
+    ["humidity_soil_4", "soil3hum-act.0:None", "int"],
+    ["temperature_leaf_1", "leaf0temp-act:None", "float"],
+    ["humidity_leaf_1", "leaf0hum-act.0:None", "int"],
+    ["temperature_leaf_2", "leaf1temp-act:None", "float"],
+    ["humidity_leaf_2", "leaf1hum-act.0:None", "int"],
+    ["temperature_leaf_3", "leaf2temp-act:None", "float"],
+    ["humidity_leaf_3", "leaf2hum-act.0:None", "int"],
+    ["temperature_leaf_4", "leaf3temp-act:None", "float"],
+    ["humidity_leaf_4", "leaf3hum-act.0:None", "int"],
 ]
 
 FIELDS_STATION = [

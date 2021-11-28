@@ -37,8 +37,6 @@ class MeteobridgeApiClient:
         ip_address: str,
         units: Optional[str] = UNIT_TYPE_METRIC,
         extra_sensors: Optional[int] = 0,
-        extra_soil_sensors: Optional[int] = 0,
-        extra_leaf_sensors: Optional[int] = 0,
         homeassistant: Optional(bool) = True,
         session: Optional[ClientSession] = None,
     ) -> None:
@@ -49,8 +47,6 @@ class MeteobridgeApiClient:
         self.units = units
         self.homeassistant = homeassistant
         self.extra_sensors = extra_sensors
-        self.extra_soil_sensors = extra_soil_sensors
-        self.extra_leaf_sensors = extra_leaf_sensors
 
         if self.units not in VALID_UNIT_TYPES:
             self.units = UNIT_TYPE_METRIC
@@ -169,42 +165,39 @@ class MeteobridgeApiClient:
                 air_temperature_ymintime=self.cnv.utc_from_mbtime(data["air_temperature_ymintime"]),
                 air_temperature_ymax=self.cnv.temperature(data["air_temperature_ymax"]),
                 air_temperature_ymaxtime=self.cnv.utc_from_mbtime(data["air_temperature_ymaxtime"]),
+                temperature_soil_1=self.cnv.temperature(data["temperature_soil_1"]),
+                humidity_soil_1=data["humidity_soil_1"],
+                temperature_soil_2=self.cnv.temperature(data["temperature_soil_2"]),
+                humidity_soil_2=data["humidity_soil_2"],
+                temperature_soil_3=self.cnv.temperature(data["temperature_soil_3"]),
+                humidity_soil_3=data["humidity_soil_3"],
+                temperature_soil_4=self.cnv.temperature(data["temperature_soil_4"]),
+                humidity_soil_4=data["humidity_soil_4"],
+                temperature_leaf_1=self.cnv.temperature(data["temperature_leaf_1"]),
+                humidity_leaf_1=data["humidity_leaf_1"],
+                temperature_leaf_2=self.cnv.temperature(data["temperature_leaf_2"]),
+                humidity_leaf_2=data["humidity_leaf_2"],
+                temperature_leaf_3=self.cnv.temperature(data["temperature_leaf_3"]),
+                humidity_leaf_3=data["humidity_leaf_3"],
+                temperature_leaf_4=self.cnv.temperature(data["temperature_leaf_4"]),
+                humidity_leaf_4=data["humidity_leaf_4"],
                 is_freezing=self.calc.is_freezing(data["air_temperature"]),
                 is_raining=self.calc.is_raining(data["precip_rate"]),
                 is_lowbat=True if data["is_lowbat"] == 1 else False,
             )
 
-            if self.extra_sensors > 0 or self.extra_soil_sensors > 0 or self.extra_leaf_sensors > 0:
+            if self.extra_sensors > 0:
                 extra_sensors = await self._get_extra_sensor_values()
 
-                if self.extra_sensors > 0:
-                    sensor_num = 1
-                    while sensor_num < self.extra_sensors + 1:
-                        temp_field = f"temperature_extra_{sensor_num}"
-                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                        hum_field = f"relative_humidity_extra_{sensor_num}"
-                        setattr(entity_data, hum_field, extra_sensors[hum_field])
-                        heat_field = f"heat_index_extra_{sensor_num}"
-                        setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
-                        sensor_num += 1
-
-                if self.extra_soil_sensors > 0:
-                    sensor_num = 1
-                    while sensor_num < self.extra_soil_sensors + 1:
-                        temp_field = f"temperature_soil_{sensor_num}"
-                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                        hum_field = f"humidity_soil_{sensor_num}"
-                        setattr(entity_data, hum_field, extra_sensors[hum_field])
-                        sensor_num += 1
-
-                if self.extra_leaf_sensors > 0:
-                    sensor_num = 1
-                    while sensor_num < self.extra_leaf_sensors + 1:
-                        temp_field = f"temperature_leaf_{sensor_num}"
-                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                        hum_field = f"humidity_leaf_{sensor_num}"
-                        setattr(entity_data, hum_field, extra_sensors[hum_field])
-                        sensor_num += 1
+                sensor_num = 1
+                while sensor_num < self.extra_sensors + 1:
+                    temp_field = f"temperature_extra_{sensor_num}"
+                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                    hum_field = f"relative_humidity_extra_{sensor_num}"
+                    setattr(entity_data, hum_field, extra_sensors[hum_field])
+                    heat_field = f"heat_index_extra_{sensor_num}"
+                    setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
+                    sensor_num += 1
 
             return entity_data
 
@@ -265,36 +258,6 @@ class MeteobridgeApiClient:
             item_array.append(f"heat_index_extra_{count}")
             item_array.append(f"th{count}heatindex-act.1:None")
             item_array.append("float")
-            sensor_array.append(item_array)
-
-        # Soil Sensors
-        count = 0
-        while count < self.extra_soil_sensors:
-            count += 1
-            item_array = []
-            item_array.append(f"temperature_soil_{count}")
-            item_array.append(f"soil{count - 1}temp-act:None")
-            item_array.append("float")
-            sensor_array.append(item_array)
-            item_array = []
-            item_array.append(f"humidity_soil_{count}")
-            item_array.append(f"soil{count - 1}hum-act.0:None")
-            item_array.append("int")
-            sensor_array.append(item_array)
-
-        # Leaf Sensors
-        count = 0
-        while count < self.extra_leaf_sensors:
-            count += 1
-            item_array = []
-            item_array.append(f"temperature_leaf_{count}")
-            item_array.append(f"leaf{count - 1}temp-act:None")
-            item_array.append("float")
-            sensor_array.append(item_array)
-            item_array = []
-            item_array.append(f"humidity_leaf_{count}")
-            item_array.append(f"leaf{count - 1}hum-act.0:None")
-            item_array.append("int")
             sensor_array.append(item_array)
 
         data_fields = self._build_endpoint(sensor_array)
