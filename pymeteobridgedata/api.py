@@ -174,32 +174,37 @@ class MeteobridgeApiClient:
                 is_lowbat=True if data["is_lowbat"] == 1 else False,
             )
 
-            if self.extra_sensors > 0 or self.extra_soil_sensors or self.extra_leaf_sensors > 0:
+            if self.extra_sensors > 0 or self.extra_soil_sensors > 0 or self.extra_leaf_sensors > 0:
                 extra_sensors = await self._get_extra_sensor_values()
-                _LOGGER.error(extra_sensors)
-                sensor_num = 1
-                while sensor_num < self.extra_sensors + 1:
-                    temp_field = f"temperature_extra_{sensor_num}"
-                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                    hum_field = f"relative_humidity_extra_{sensor_num}"
-                    setattr(entity_data, hum_field, extra_sensors[hum_field])
-                    heat_field = f"heat_index_extra_{sensor_num}"
-                    setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
-                    sensor_num += 1
-                sensor_num = 1
-                while sensor_num < self.extra_soil_sensors + 1:
-                    temp_field = f"temperature_soil_{sensor_num}"
-                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                    hum_field = f"humidity_soil_{sensor_num}"
-                    setattr(entity_data, hum_field, extra_sensors[hum_field])
-                    sensor_num += 1
-                sensor_num = 1
-                while sensor_num < self.extra_leaf_sensors + 1:
-                    temp_field = f"temperature_leaf_{sensor_num}"
-                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                    hum_field = f"humidity_leaf_{sensor_num}"
-                    setattr(entity_data, hum_field, extra_sensors[hum_field])
-                    sensor_num += 1
+
+                if self.extra_sensors > 0:
+                    sensor_num = 1
+                    while sensor_num < self.extra_sensors + 1:
+                        temp_field = f"temperature_extra_{sensor_num}"
+                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                        hum_field = f"relative_humidity_extra_{sensor_num}"
+                        setattr(entity_data, hum_field, extra_sensors[hum_field])
+                        heat_field = f"heat_index_extra_{sensor_num}"
+                        setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
+                        sensor_num += 1
+
+                if self.extra_soil_sensors > 0:
+                    sensor_num = 1
+                    while sensor_num < self.extra_soil_sensors + 1:
+                        temp_field = f"temperature_soil_{sensor_num}"
+                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                        hum_field = f"humidity_soil_{sensor_num}"
+                        setattr(entity_data, hum_field, extra_sensors[hum_field])
+                        sensor_num += 1
+
+                if self.extra_leaf_sensors > 0:
+                    sensor_num = 1
+                    while sensor_num < self.extra_leaf_sensors + 1:
+                        temp_field = f"temperature_leaf_{sensor_num}"
+                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                        hum_field = f"humidity_leaf_{sensor_num}"
+                        setattr(entity_data, hum_field, extra_sensors[hum_field])
+                        sensor_num += 1
 
             return entity_data
 
