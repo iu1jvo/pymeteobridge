@@ -267,12 +267,12 @@ class MeteobridgeApiClient:
             count += 1
             item_array = []
             item_array.append(f"temperature_soil_{count}")
-            item_array.append(f"soil{count}temp-act:None")
+            item_array.append(f"soil{count - 1}temp-act:None")
             item_array.append("float")
             sensor_array.append(item_array)
             item_array = []
             item_array.append(f"humidity_soil_{count}")
-            item_array.append(f"soil{count}hum-act.0:None")
+            item_array.append(f"soil{count - 1}hum-act.0:None")
             item_array.append("int")
             sensor_array.append(item_array)
 
@@ -282,12 +282,12 @@ class MeteobridgeApiClient:
             count += 1
             item_array = []
             item_array.append(f"temperature_leaf_{count}")
-            item_array.append(f"leaf{count}temp-act:None")
+            item_array.append(f"leaf{count - 1}temp-act:None")
             item_array.append("float")
             sensor_array.append(item_array)
             item_array = []
             item_array.append(f"humidity_leaf_{count}")
-            item_array.append(f"leaf{count}hum-act.0:None")
+            item_array.append(f"leaf{count - 1}hum-act.0:None")
             item_array.append("int")
             sensor_array.append(item_array)
 
