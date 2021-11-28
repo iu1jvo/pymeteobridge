@@ -199,7 +199,7 @@ class MeteobridgeApiClient:
 
                 if self.extra_leaf_sensors > 0:
                     sensor_num = 1
-                    while sensor_num < self.extra_leaf_sensors:
+                    while sensor_num < self.extra_leaf_sensors + 1:
                         temp_field = f"temperature_leaf_{sensor_num}"
                         setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
                         hum_field = f"humidity_leaf_{sensor_num}"
