@@ -26,7 +26,7 @@ class Conversions:
         if value is None:
             return None
 
-        if value is None or self.units == UNIT_TYPE_METRIC or self.homeassistant:
+        if self.units == UNIT_TYPE_METRIC or self.homeassistant:
             return round(value, 1)
         return round(value * 1.8 + 32, 1)
 
