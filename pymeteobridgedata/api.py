@@ -56,7 +56,7 @@ class MeteobridgeApiClient:
         self.req = session
 
         self.cnv = Conversions(self.units, self.homeassistant)
-        self.calc = Calculations()
+        self.calc = Calculations(self.units)
 
         self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
                          "/cgi-bin/template.cgi?template=")
@@ -153,6 +153,7 @@ class MeteobridgeApiClient:
                 forecast=data["forecast"],
                 indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
                 indoor_humidity=data["indoor_humidity"],
+                air_density=self.calc.air_density(data["air_temperature"], data["station_pressure"]),
                 air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
                 air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
                 air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),

@@ -60,6 +60,7 @@ class ObservationDescription:
     forecast: str | None = None
     indoor_temperature: float | None = None
     indoor_humidity: int | None = None
+    air_density: float | None = None
     air_temperature_dmin: float | None = None
     air_temperature_dmintime: str | None = None
     air_temperature_dmax: float | None = None

@@ -115,6 +115,10 @@ class Conversions:
 class Calculations:
     """Calculate entity values."""
 
+    def __init__(self, units: str) -> None:
+        """Set initial values."""
+        self.units = units
+
     def is_raining(self, rain_rate):
         """Return true if it is raining."""
         if rain_rate is None:
@@ -270,3 +274,20 @@ class Calculations:
             return wind_chill
 
         return air_temperature
+
+    def air_density(self, temperature: float, station_pressure: float) -> float:
+        """Return Air Density."""
+        if temperature is None or station_pressure is None:
+            return None
+
+        kelvin = temperature + 273.15
+        r_specific = 287.058
+        decimals = 2
+
+        air_dens = (station_pressure * 100) / (r_specific * kelvin)
+
+        if self.units != UNIT_TYPE_METRIC:
+            air_dens = air_dens * 0.06243
+            decimals = 4
+
+        return round(air_dens, decimals)
