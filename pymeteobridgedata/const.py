@@ -69,7 +69,7 @@ FIELDS_STATION = [
     ["timezone", "mbsystem-timezone:None", "str"],
     ["uptime", "mbsystem-uptime:0", "int"],
     ["ip", "mbsystem-ip:--", "str"],
-    ["elevation", "mbsystem-altitude:0", "int"],
+    ["elevation", "mbsystem-altitude.0:0", "int"],
 ]
 
 UNIT_TYPE_METRIC = "metric"
