@@ -290,7 +290,7 @@ class MeteobridgeApiClient:
         data = "{"
         index = 0
         for data_field in data_fields:
-            enc = "'" if data_field[2] == "str" else ""
+            enc = "'" if (data_field[2] == "str" and items[index] != "None") else ""
             data += f"'{data_field[0]}': {enc}{items[index]}{enc}, "
             index += 1
         data = data[0:-2]
