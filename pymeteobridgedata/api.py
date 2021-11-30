@@ -103,20 +103,24 @@ class MeteobridgeApiClient:
         data = await self._process_request_result(result, FIELDS_OBSERVATION)
 
         if data is not None:
+            # Calculated Fields
             visibility = self.calc.visibility(
                 self._device_data.elevation,
                 data["air_temperature"],
                 data["relative_humidity"],
                 data["dew_point"]
             )
+            wind_chill = self.calc.wind_chill(data["air_temperature"], data["wind_gust"])
             feels_like = self.calc.feels_like(
                 data["air_temperature"],
                 data["relative_humidity"],
                 data["wind_gust"],
                 data["heat_index"],
-                data["wind_chill"]
+                wind_chill,
             )
             beaufort_data: BeaufortDescription = self.calc.beaufort(data["wind_avg"])
+
+            # Raw Data Fields
             entity_data = ObservationDescription(
                 key=self._device_data.key,
                 utc_time=self.cnv.utc_from_timestamp(data["utc_time"]),
@@ -140,7 +144,7 @@ class MeteobridgeApiClient:
                 lightning_strike_count=data["lightning_strike_count"],
                 lightning_strike_last_distance=data["lightning_strike_last_distance"],
                 heat_index=self.cnv.temperature(data["heat_index"]),
-                wind_chill=self.cnv.temperature(data["wind_chill"]),
+                wind_chill=wind_chill,
                 feels_like=self.cnv.temperature(feels_like),
                 dew_point=self.cnv.temperature(data["dew_point"]),
                 trend_temperature=data["trend_temperature"],

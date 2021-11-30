@@ -357,3 +357,17 @@ class Calculations:
             return "fine"
         else:
             return "excellent"
+
+    def wind_chill(self, temperature: float, wind_speed: float) -> float:
+        """Return Wind Cill Factor."""
+        if temperature is None or wind_speed is None:
+            return None
+
+        wind_speed_kmh = wind_speed * 3.6
+
+        twc = (13.12 + 0.6215 * temperature - 11.37 * math.pow(wind_speed_kmh, 0.16)
+               + 0.3965 * temperature * math.pow(wind_speed_kmh, 0.16))
+
+        if self.units != UNIT_TYPE_METRIC:
+            return round(twc * 1.8 + 32, 1)
+        return round(twc, 1)
