@@ -18,15 +18,13 @@ pip install pymeteobridgedata
 
 This library is primarily designed to be used in an async context.
 
-The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClient`. This interface takes 5 options:
+The main interface for the library is the `pymeteobridgedata.MeteobridgeApiClient`. This interface takes 6 options:
 
 * `username`: (required) The username to login to your Meteobridge device. Default this *meteobridge*.
 * `password`: (required) The password for your meteobridge device.
 * `ip_address`: (required) IP Address of the Meteobridge device.
 * `units`: (optional) Valid options here are *metric* or *imperial*. Metebridge devices always deliver data in metric units, so conversion will only take place if if metric is not selected. Default value is **metric**
 * `extra_sensors`: (optional) Number of extra sensors attached to the Meteobridge Logger (Default is 0, max is 7)
-* `extra_soil_sensors`: (optional) Number of extra soilsensors attached to the Meteobridge Logger (Default is 0, max is 4)
-* `extra_leaf_sensors`: (optional) Number of extra sensors attached to the Meteobridge Logger (Default is 0, max is 4)
 * `homeassistant`: (optional) Valid options are *True* or *False*. If set to True, there will be some unit types that will not be converted, as Home Assistant will take care of that. Default value is **True**
 
 ### Example Python script
