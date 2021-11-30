@@ -95,7 +95,7 @@ class MeteobridgeApiClient:
         if self._device_data is None:
             _LOGGER.error("Logger has not been initialized. "
                           "Run initilaize() function first.")
-            return
+            raise BadRequest("Waiting for valid data from Meteobridge.")
 
         data_fields = self._build_endpoint(FIELDS_OBSERVATION)
         endpoint = f"{self.base_url}{data_fields}"
