@@ -62,14 +62,14 @@ FIELDS_OBSERVATION = [
 ]
 
 FIELDS_STATION = [
-    ["mac", "mbsystem-mac:--", "str"],
-    ["swversion", "mbsystem-swversion:--", "float"],
-    ["platform", "mbsystem-platform:--", "str"],
-    ["station", "mbsystem-station:--", "str"],
-    ["timezone", "mbsystem-timezone:--", "str"],
-    ["uptime", "mbsystem-uptime:--", "int"],
+    ["mac", "mbsystem-mac:None", "str"],
+    ["swversion", "mbsystem-swversion:None", "float"],
+    ["platform", "mbsystem-platform:None", "str"],
+    ["station", "mbsystem-station:None", "str"],
+    ["timezone", "mbsystem-timezone:None", "str"],
+    ["uptime", "mbsystem-uptime:0", "int"],
     ["ip", "mbsystem-ip:--", "str"],
-    ["elevation", "mbsystem-altitude:--", "int"],
+    ["elevation", "mbsystem-altitude:0", "int"],
 ]
 
 UNIT_TYPE_METRIC = "metric"
