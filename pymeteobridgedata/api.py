@@ -267,6 +267,8 @@ class MeteobridgeApiClient:
         data_fields = self._build_endpoint(sensor_array)
         endpoint = f"{self.base_url}{data_fields}"
         result = await self._async_request("get", endpoint)
+        if result is None:
+            return None
         data = await self._process_request_result(result, sensor_array)
         return data
 
@@ -286,17 +288,21 @@ class MeteobridgeApiClient:
         if result is None:
             return None
 
-        items = result.split(";")
-        data = "{"
-        index = 0
-        for data_field in data_fields:
-            enc = "'" if (data_field[2] == "str" and items[index] != "None") else ""
-            data += f"'{data_field[0]}': {enc}{items[index]}{enc}, "
-            index += 1
-        data = data[0:-2]
-        data += "}"
+        try:
+            items = result.split(";")
+            data = "{"
+            index = 0
+            for data_field in data_fields:
+                enc = "'" if (data_field[2] == "str" and items[index] != "None") else ""
+                data += f"'{data_field[0]}': {enc}{items[index]}{enc}, "
+                index += 1
+            data = data[0:-2]
+            data += "}"
 
-        return ast.literal_eval(data)
+            return ast.literal_eval(data)
+        except IndexError:
+            _LOGGER.error("No data or faulty data received from Meteobridge Station.")
+            return None
 
     async def _async_request(
         self,
