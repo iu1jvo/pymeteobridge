@@ -291,3 +291,51 @@ class Calculations:
             decimals = 4
 
         return round(air_dens, decimals)
+
+    def wetbulb(self, temp: float, humidity: int, pressure: float) -> float:
+        """Return Wet Bulb Temperature.
+
+        Converted from a JS formula made by Gary W Funk
+        """
+        if temp is None or humidity is None or pressure is None:
+            return None
+
+        t = float(temp)
+        rh = float(humidity)
+        p = float(pressure)
+
+        # Variables
+        edifference = 1
+        twguess = 0
+        previoussign = 1
+        incr = 10
+        es = 6.112 * math.exp(17.67 * t / (t + 243.5))
+        e2 = es * (rh / 100)
+
+        while abs(edifference) > 0.005:
+            ewguess = 6.112 * math.exp((17.67 * twguess) / (twguess + 243.5))
+            eguess = ewguess - p * (t - twguess) * 0.00066 * (1 + (0.00115 * twguess))
+            edifference = e2 - eguess
+            if edifference == 0:
+                break
+
+            if edifference < 0:
+                cursign = -1
+                if cursign != previoussign:
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+            else:
+                cursign = 1
+                if cursign != previoussign:
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+
+            twguess = twguess + incr * previoussign
+
+        if self.units != UNIT_TYPE_METRIC:
+            return round(twguess * 1.8 + 32, 1)
+        return round(twguess, 1)

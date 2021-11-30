@@ -154,6 +154,8 @@ class MeteobridgeApiClient:
                 indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
                 indoor_humidity=data["indoor_humidity"],
                 air_density=self.calc.air_density(data["air_temperature"], data["station_pressure"]),
+                wet_bulb=self.calc.wetbulb(
+                    data["air_temperature"], data["relative_humidity"], data["station_pressure"]),
                 air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
                 air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
                 air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),
