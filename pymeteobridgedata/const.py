@@ -26,6 +26,7 @@ FIELDS_OBSERVATION = [
     ["trend_pressure", "thb0seapress-delta10:None", "float"],
     ["air_pm_10", "air0pm-act:None", "float"],
     ["air_pm_25", "air1pm-act:None", "float"],
+    ["air_pm_25_havg", "air1pm-havg:None", "float"],
     ["air_pm_1", "air2pm-act:None", "float"],
     ["is_lowbat", "th0lowbat-act.0:None", "int"],
     ["forecast", "forecast-text:None", "str"],

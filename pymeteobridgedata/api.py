@@ -150,6 +150,7 @@ class MeteobridgeApiClient:
                 air_pm_10=data["air_pm_10"],
                 air_pm_25=data["air_pm_25"],
                 air_pm_1=data["air_pm_1"],
+                aqi=self.calc.aqi(data["air_pm_25_havg"]),
                 forecast=data["forecast"],
                 indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
                 indoor_humidity=data["indoor_humidity"],

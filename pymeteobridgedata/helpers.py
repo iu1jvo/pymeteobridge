@@ -339,3 +339,21 @@ class Calculations:
         if self.units != UNIT_TYPE_METRIC:
             return round(twguess * 1.8 + 32, 1)
         return round(twguess, 1)
+
+    def aqi(self, pm25_havg: float) -> int:
+        """Return PM2.5 hourly Air Quality."""
+        if pm25_havg is None:
+            return None
+
+        if pm25_havg > 109:
+            return "severe"
+        elif pm25_havg > 54:
+            return "very_poor"
+        elif pm25_havg > 29:
+            return "poor"
+        elif pm25_havg > 14:
+            return "moderate"
+        elif pm25_havg > 6:
+            return "fine"
+        else:
+            return "excellent"
