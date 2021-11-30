@@ -75,7 +75,6 @@ class ObservationDescription:
     air_temperature_ymintime: str | None = None
     air_temperature_ymax: float | None = None
     air_temperature_ymaxtime: str | None = None
-    is_lowbat: bool | None = None
     is_freezing: bool | None = None
     is_raining: bool | None = None
     temperature_extra_1: float | None = None

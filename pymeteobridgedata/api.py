@@ -20,7 +20,7 @@ from pymeteobridgedata.data import (
     ObservationDescription,
 )
 from pymeteobridgedata.exceptions import BadRequest
-from pymeteobridgedata.helpers import Calculations, Conversions
+from pymeteobridgedata.conversion import Conversions
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,7 +56,6 @@ class MeteobridgeApiClient:
         self.req = session
 
         self.cnv = Conversions(self.units, self.homeassistant)
-        self.calc = Calculations(self.units)
 
         self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
                          "/cgi-bin/template.cgi?template=")
@@ -104,21 +103,20 @@ class MeteobridgeApiClient:
 
         if data is not None:
             # Calculated Fields
-            visibility = self.calc.visibility(
+            visibility = self.cnv.visibility(
                 self._device_data.elevation,
                 data["air_temperature"],
                 data["relative_humidity"],
                 data["dew_point"]
             )
-            wind_chill = self.calc.wind_chill(data["air_temperature"], data["wind_gust"])
-            feels_like = self.calc.feels_like(
+            wind_chill = self.cnv.wind_chill(data["air_temperature"], data["wind_gust"])
+            feels_like = self.cnv.feels_like(
                 data["air_temperature"],
                 data["relative_humidity"],
-                data["wind_gust"],
-                data["heat_index"],
-                wind_chill,
+                data["wind_gust"]
             )
-            beaufort_data: BeaufortDescription = self.calc.beaufort(data["wind_avg"])
+            beaufort_data: BeaufortDescription = self.cnv.beaufort(data["wind_avg"])
+            wet_bulb = self.cnv.wetbulb(data["air_temperature"], data["relative_humidity"], data["station_pressure"])
 
             # Raw Data Fields
             entity_data = ObservationDescription(
@@ -133,34 +131,33 @@ class MeteobridgeApiClient:
                 wind_avg=self.cnv.windspeed(data["wind_avg"]),
                 wind_gust=self.cnv.windspeed(data["wind_gust"]),
                 wind_direction=data["wind_direction"],
-                wind_cardinal=self.calc.wind_direction(data["wind_direction"]),
+                wind_cardinal=self.cnv.wind_direction(data["wind_direction"]),
                 beaufort=beaufort_data.value,
                 beaufort_description=beaufort_data.description,
                 uv=data["uv"],
-                uv_description=self.calc.uv_description(data["uv"]),
+                uv_description=self.cnv.uv_description(data["uv"]),
                 solar_radiation=data["solar_radiation"],
                 visibility=self.cnv.distance(visibility),
                 lightning_strike_last_epoch=self.cnv.utc_from_timestamp(data["lightning_strike_last_epoch"]),
                 lightning_strike_count=data["lightning_strike_count"],
                 lightning_strike_last_distance=data["lightning_strike_last_distance"],
                 heat_index=self.cnv.temperature(data["heat_index"]),
-                wind_chill=wind_chill,
+                wind_chill=self.cnv.temperature(wind_chill),
                 feels_like=self.cnv.temperature(feels_like),
                 dew_point=self.cnv.temperature(data["dew_point"]),
                 trend_temperature=data["trend_temperature"],
-                temperature_trend=self.calc.trend_description(data["trend_temperature"]),
+                temperature_trend=self.cnv.trend_description(data["trend_temperature"]),
                 trend_pressure=data["trend_pressure"],
-                pressure_trend=self.calc.trend_description(data["trend_pressure"]),
+                pressure_trend=self.cnv.trend_description(data["trend_pressure"]),
                 air_pm_10=data["air_pm_10"],
                 air_pm_25=data["air_pm_25"],
                 air_pm_1=data["air_pm_1"],
-                aqi=self.calc.aqi(data["air_pm_25_havg"]),
+                aqi=self.cnv.aqi(data["air_pm_25_havg"]),
                 forecast=data["forecast"],
                 indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
                 indoor_humidity=data["indoor_humidity"],
-                air_density=self.calc.air_density(data["air_temperature"], data["station_pressure"]),
-                wet_bulb=self.calc.wetbulb(
-                    data["air_temperature"], data["relative_humidity"], data["station_pressure"]),
+                air_density=self.cnv.air_density(data["air_temperature"], data["station_pressure"]),
+                wet_bulb=self.cnv.temperature(wet_bulb),
                 air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
                 air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
                 air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),
@@ -189,9 +186,8 @@ class MeteobridgeApiClient:
                 humidity_leaf_3=data["humidity_leaf_3"],
                 temperature_leaf_4=self.cnv.temperature(data["temperature_leaf_4"]),
                 humidity_leaf_4=data["humidity_leaf_4"],
-                is_freezing=self.calc.is_freezing(data["air_temperature"]),
-                is_raining=self.calc.is_raining(data["precip_rate"]),
-                is_lowbat=True if data["is_lowbat"] == 1 else False,
+                is_freezing=self.cnv.is_freezing(data["air_temperature"]),
+                is_raining=self.cnv.is_raining(data["precip_rate"]),
             )
 
             if self.extra_sensors > 0:

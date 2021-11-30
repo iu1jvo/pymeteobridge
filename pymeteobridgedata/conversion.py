@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Conversions:
-    """Converts values."""
+    """Convert and Calculate values."""
 
     def __init__(self, units: str, homeassistant: bool) -> None:
         """Set initial values."""
@@ -95,7 +95,8 @@ class Conversions:
             dt_obj = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S")
             return dt_obj.replace(tzinfo=UTC)
         except Exception as e:
-            _LOGGER.error("An error occured converting MB Time. Input Value is : %s and Error message is %s", timestamp, str(e))
+            _LOGGER.error("An error occured converting MB Time. Input Value is : %s and Error message is %s",
+                          timestamp, str(e))
             return None
 
     def hw_platform(self, platform: str) -> str:
@@ -110,14 +111,6 @@ class Conversions:
             return "Meteobridge Nano"
 
         return platform
-
-
-class Calculations:
-    """Calculate entity values."""
-
-    def __init__(self, units: str) -> None:
-        """Set initial values."""
-        self.units = units
 
     def is_raining(self, rain_rate):
         """Return true if it is raining."""
@@ -251,29 +244,40 @@ class Calculations:
 
         return bft
 
-    def feels_like(
-        self,
-        air_temperature,
-        relative_humidity,
-        wind_gust,
-        heat_index,
-        wind_chill
-    ) -> float:
-        """Calculate the feel like temperature."""
-        if (air_temperature is None
-                or relative_humidity is None
-                or wind_gust is None
-                or heat_index is None
-                or wind_chill is None):
+    # def feels_like(
+    #     self,
+    #     air_temperature,
+    #     relative_humidity,
+    #     wind_gust,
+    #     heat_index,
+    #     wind_chill
+    # ) -> float:
+    #     """Calculate the feel like temperature."""
+    #     if (air_temperature is None
+    #             or relative_humidity is None
+    #             or wind_gust is None
+    #             or heat_index is None
+    #             or wind_chill is None):
+    #         return None
+
+    #     if air_temperature >= 26.67 and relative_humidity >= 40:
+    #         return heat_index
+
+    #     if air_temperature <= 10 and wind_gust >= 1.34:
+    #         return wind_chill
+
+    #     return air_temperature
+
+    def feels_like(self, temperature, humidity, windspeed):
+        """Calculate apparent temperature."""
+        if temperature is None or humidity is None or windspeed is None:
             return None
 
-        if air_temperature >= 26.67 and relative_humidity >= 40:
-            return heat_index
-
-        if air_temperature <= 10 and wind_gust >= 1.34:
-            return wind_chill
-
-        return air_temperature
+        e_value = (
+            humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
+        )
+        feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
+        return self.temperature(feelslike_c)
 
     def air_density(self, temperature: float, station_pressure: float) -> float:
         """Return Air Density."""
@@ -336,9 +340,7 @@ class Calculations:
 
             twguess = twguess + incr * previoussign
 
-        if self.units != UNIT_TYPE_METRIC:
-            return round(twguess * 1.8 + 32, 1)
-        return round(twguess, 1)
+        return twguess
 
     def aqi(self, pm25_havg: float) -> int:
         """Return PM2.5 hourly Air Quality."""
@@ -368,6 +370,4 @@ class Calculations:
         twc = (13.12 + 0.6215 * temperature - 11.37 * math.pow(wind_speed_kmh, 0.16)
                + 0.3965 * temperature * math.pow(wind_speed_kmh, 0.16))
 
-        if self.units != UNIT_TYPE_METRIC:
-            return round(twc * 1.8 + 32, 1)
-        return round(twc, 1)
+        return twc
