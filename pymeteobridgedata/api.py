@@ -115,7 +115,7 @@ class MeteobridgeApiClient:
                 data["relative_humidity"],
                 data["wind_gust"]
             )
-            beaufort_data: BeaufortDescription = self.cnv.beaufort(data["wind_avg"])
+            beaufort_data: BeaufortDescription = self.cnv.beaufort_value(data["wind_avg"])
             wet_bulb = self.cnv.wetbulb(
                 data["air_temperature"],
                 data["relative_humidity"],
