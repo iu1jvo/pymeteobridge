@@ -57,7 +57,8 @@ class ObservationDescription:
     air_pm_10: float | None = None
     air_pm_25: float | None = None
     air_pm_1: float | None = None
-    aqi: int | None = None
+    aqi_level: int | None = None
+    aqi: str | None = None
     forecast: str | None = None
     indoor_temperature: float | None = None
     indoor_humidity: int | None = None

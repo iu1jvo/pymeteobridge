@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import math
+import aqi
 
 from pymeteobridgedata.const import UNIT_TYPE_METRIC
 from pymeteobridgedata.data import BeaufortDescription
@@ -306,7 +307,13 @@ class Conversions:
 
         return twguess
 
-    def aqi(self, pm25_havg: float) -> int:
+    def aqi_level(self, pm25_value: float) -> int:
+        """Return PM2.5 AQI Level."""
+        if pm25_value is None:
+            return None
+        return aqi.to_iaqi(aqi.POLLUTANT_PM25, pm25_value, algo=aqi.ALGO_EPA)
+
+    def aqi_description(self, pm25_havg: float) -> str:
         """Return PM2.5 hourly Air Quality."""
         if pm25_havg is None:
             return None
