@@ -31,6 +31,8 @@ class ObservationDescription:
     sea_level_pressure: float | None = None
     relative_humidity: int | None = None
     precip_accum_local_day: float | None = None
+    precip_accum_month: float | None = None
+    precip_accum_year: float | None = None
     precip_rate: float | None = None
     wind_avg: float | None = None
     wind_direction: int | None = None

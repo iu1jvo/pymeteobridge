@@ -11,6 +11,8 @@ FIELDS_OBSERVATION = [
     ["relative_humidity", "th0hum-act.0:None", "int"],
     ["precip_rate", "rain0rate-act:None", "float"],
     ["precip_accum_local_day", "rain0total-daysum:None", "float"],
+    ["precip_accum_month", "rain0total-monthsum:None", "float"],
+    ["precip_accum_year", "rain0total-yearsum:None", "float"],
     ["wind_avg", "wind0avgwind-act:None", "float"],
     ["wind_gust", "wind0wind-max1:None", "float"],
     ["wind_direction", "wind0dir-avg5.0:None", "int"],
