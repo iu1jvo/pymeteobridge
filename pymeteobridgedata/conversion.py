@@ -231,7 +231,7 @@ class Conversions:
         for k, v in mapping_text.items():
             if wind_speed > float(k):
                 return BeaufortDescription(value=v[0], description=v[1])
-        return None
+        return BeaufortDescription(value=0, description="None")
 
     def feels_like(self, temperature, humidity, windspeed):
         """Calculate apparent temperature."""
