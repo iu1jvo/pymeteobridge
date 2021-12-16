@@ -213,6 +213,10 @@ class Conversions:
 
     def beaufort_value(self, wind_speed: float) -> BeaufortDescription:
         """Return Beaufort Value and Description."""
+        """Return Beaufort Value and Description."""
+        if wind_speed is None:
+            return BeaufortDescription(value=0, description="None")
+
         mapping_text = {
             "32.7": [12, "hurricane"],
             "28.5": [11, "violent_storm"],
@@ -231,8 +235,8 @@ class Conversions:
         for k, v in mapping_text.items():
             if wind_speed > float(k):
                 return BeaufortDescription(value=v[0], description=v[1])
-        return BeaufortDescription(value=0, description="None")
-
+        return None
+        
     def feels_like(self, temperature, humidity, windspeed):
         """Calculate apparent temperature."""
         if temperature is None or humidity is None or windspeed is None:
