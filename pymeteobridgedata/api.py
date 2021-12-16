@@ -247,6 +247,7 @@ class MeteobridgeApiClient:
         _LOGGER.debug("FIELD COUNT: %s", len(FIELDS_OBSERVATION))
         data_fields = self._build_endpoint(FIELDS_OBSERVATION)
         endpoint = f"{self.base_url}{data_fields}"
+        _LOGGER.debug("DATA FIELDS: %s", data_fields)
         data = await self._async_request("get", endpoint)
         result = await self._process_request_result(data, FIELDS_OBSERVATION)
 
