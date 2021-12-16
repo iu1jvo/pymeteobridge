@@ -101,116 +101,122 @@ class MeteobridgeApiClient:
         result = await self._async_request("get", endpoint)
         data = await self._process_request_result(result, FIELDS_OBSERVATION)
 
-        if data is not None:
-            # Calculated Fields
-            visibility = self.cnv.visibility(
-                self._device_data.elevation,
-                data["air_temperature"],
-                data["relative_humidity"],
-                data["dew_point"]
-            )
-            wind_chill = self.cnv.wind_chill(data["air_temperature"], data["wind_gust"])
-            feels_like = self.cnv.feels_like(
-                data["air_temperature"],
-                data["relative_humidity"],
-                data["wind_gust"]
-            )
-            beaufort_data: BeaufortDescription = self.cnv.beaufort_value(data["wind_avg"])
-            wet_bulb = self.cnv.wetbulb(
-                data["air_temperature"],
-                data["relative_humidity"],
-                data["station_pressure"]
-            )
+        try:
+            if data is not None:
+                # Calculated Fields
+                visibility = self.cnv.visibility(
+                    self._device_data.elevation,
+                    data["air_temperature"],
+                    data["relative_humidity"],
+                    data["dew_point"]
+                )
+                wind_chill = self.cnv.wind_chill(data["air_temperature"], data["wind_gust"])
+                feels_like = self.cnv.feels_like(
+                    data["air_temperature"],
+                    data["relative_humidity"],
+                    data["wind_gust"]
+                )
+                beaufort_data: BeaufortDescription = self.cnv.beaufort_value(data["wind_avg"])
+                wet_bulb = self.cnv.wetbulb(
+                    data["air_temperature"],
+                    data["relative_humidity"],
+                    data["station_pressure"]
+                )
 
-            # Raw Data Fields
-            entity_data = ObservationDescription(
-                key=self._device_data.key,
-                utc_time=self.cnv.utc_from_timestamp(data["utc_time"]),
-                air_temperature=self.cnv.temperature(data["air_temperature"]),
-                sea_level_pressure=self.cnv.pressure(data["sea_level_pressure"]),
-                station_pressure=self.cnv.pressure(data["station_pressure"]),
-                relative_humidity=data["relative_humidity"],
-                precip_accum_local_day=self.cnv.rain(data["precip_accum_local_day"]),
-                precip_accum_month=self.cnv.rain(data["precip_accum_month"]),
-                precip_accum_year=self.cnv.rain(data["precip_accum_year"]),
-                precip_rate=self.cnv.rain(data["precip_rate"]),
-                wind_avg=self.cnv.windspeed(data["wind_avg"]),
-                wind_gust=self.cnv.windspeed(data["wind_gust"]),
-                wind_direction=data["wind_direction"],
-                wind_cardinal=self.cnv.wind_direction(data["wind_direction"]),
-                beaufort=beaufort_data.value,
-                beaufort_description=beaufort_data.description,
-                uv=data["uv"],
-                uv_description=self.cnv.uv_description(data["uv"]),
-                solar_radiation=data["solar_radiation"],
-                visibility=self.cnv.distance(visibility),
-                lightning_strike_last_epoch=self.cnv.utc_from_timestamp(data["lightning_strike_last_epoch"]),
-                lightning_strike_count=data["lightning_strike_count"],
-                lightning_strike_last_distance=data["lightning_strike_last_distance"],
-                heat_index=self.cnv.temperature(data["heat_index"]),
-                wind_chill=self.cnv.temperature(wind_chill),
-                feels_like=self.cnv.temperature(feels_like),
-                dew_point=self.cnv.temperature(data["dew_point"]),
-                trend_temperature=data["trend_temperature"],
-                temperature_trend=self.cnv.trend_description(data["trend_temperature"]),
-                trend_pressure=data["trend_pressure"],
-                pressure_trend=self.cnv.trend_description(data["trend_pressure"]),
-                air_pm_10=data["air_pm_10"],
-                air_pm_25=data["air_pm_25"],
-                air_pm_1=data["air_pm_1"],
-                aqi_level=self.cnv.aqi_level(data["air_pm_25_havg"]),
-                aqi=self.cnv.aqi_description(data["air_pm_25_havg"]),
-                forecast=data["forecast"],
-                indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
-                indoor_humidity=data["indoor_humidity"],
-                air_density=self.cnv.air_density(data["air_temperature"], data["station_pressure"]),
-                wet_bulb=self.cnv.temperature(wet_bulb),
-                air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
-                air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
-                air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),
-                air_temperature_dmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_dmaxtime"]),
-                air_temperature_mmin=self.cnv.temperature(data["air_temperature_mmin"]),
-                air_temperature_mmintime=self.cnv.utc_from_mbtime(data["air_temperature_mmintime"]),
-                air_temperature_mmax=self.cnv.temperature(data["air_temperature_mmax"]),
-                air_temperature_mmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_mmaxtime"]),
-                air_temperature_ymin=self.cnv.temperature(data["air_temperature_ymin"]),
-                air_temperature_ymintime=self.cnv.utc_from_mbtime(data["air_temperature_ymintime"]),
-                air_temperature_ymax=self.cnv.temperature(data["air_temperature_ymax"]),
-                air_temperature_ymaxtime=self.cnv.utc_from_mbtime(data["air_temperature_ymaxtime"]),
-                temperature_soil_1=self.cnv.temperature(data["temperature_soil_1"]),
-                humidity_soil_1=data["humidity_soil_1"],
-                temperature_soil_2=self.cnv.temperature(data["temperature_soil_2"]),
-                humidity_soil_2=data["humidity_soil_2"],
-                temperature_soil_3=self.cnv.temperature(data["temperature_soil_3"]),
-                humidity_soil_3=data["humidity_soil_3"],
-                temperature_soil_4=self.cnv.temperature(data["temperature_soil_4"]),
-                humidity_soil_4=data["humidity_soil_4"],
-                temperature_leaf_1=self.cnv.temperature(data["temperature_leaf_1"]),
-                humidity_leaf_1=data["humidity_leaf_1"],
-                temperature_leaf_2=self.cnv.temperature(data["temperature_leaf_2"]),
-                humidity_leaf_2=data["humidity_leaf_2"],
-                temperature_leaf_3=self.cnv.temperature(data["temperature_leaf_3"]),
-                humidity_leaf_3=data["humidity_leaf_3"],
-                temperature_leaf_4=self.cnv.temperature(data["temperature_leaf_4"]),
-                humidity_leaf_4=data["humidity_leaf_4"],
-                is_freezing=self.cnv.is_freezing(data["air_temperature"]),
-                is_raining=self.cnv.is_raining(data["precip_rate"]),
-            )
+                # Raw Data Fields
+                entity_data = ObservationDescription(
+                    key=self._device_data.key,
+                    utc_time=self.cnv.utc_from_timestamp(data["utc_time"]),
+                    air_temperature=self.cnv.temperature(data["air_temperature"]),
+                    sea_level_pressure=self.cnv.pressure(data["sea_level_pressure"]),
+                    station_pressure=self.cnv.pressure(data["station_pressure"]),
+                    relative_humidity=data["relative_humidity"],
+                    precip_accum_local_day=self.cnv.rain(data["precip_accum_local_day"]),
+                    precip_accum_month=self.cnv.rain(data["precip_accum_month"]),
+                    precip_accum_year=self.cnv.rain(data["precip_accum_year"]),
+                    precip_rate=self.cnv.rain(data["precip_rate"]),
+                    wind_avg=self.cnv.windspeed(data["wind_avg"]),
+                    wind_gust=self.cnv.windspeed(data["wind_gust"]),
+                    wind_direction=data["wind_direction"],
+                    wind_cardinal=self.cnv.wind_direction(data["wind_direction"]),
+                    beaufort=beaufort_data.value,
+                    beaufort_description=beaufort_data.description,
+                    uv=data["uv"],
+                    uv_description=self.cnv.uv_description(data["uv"]),
+                    solar_radiation=data["solar_radiation"],
+                    visibility=self.cnv.distance(visibility),
+                    lightning_strike_last_epoch=self.cnv.utc_from_timestamp(data["lightning_strike_last_epoch"]),
+                    lightning_strike_count=data["lightning_strike_count"],
+                    lightning_strike_last_distance=data["lightning_strike_last_distance"],
+                    heat_index=self.cnv.temperature(data["heat_index"]),
+                    wind_chill=self.cnv.temperature(wind_chill),
+                    feels_like=self.cnv.temperature(feels_like),
+                    dew_point=self.cnv.temperature(data["dew_point"]),
+                    trend_temperature=data["trend_temperature"],
+                    temperature_trend=self.cnv.trend_description(data["trend_temperature"]),
+                    trend_pressure=data["trend_pressure"],
+                    pressure_trend=self.cnv.trend_description(data["trend_pressure"]),
+                    air_pm_10=data["air_pm_10"],
+                    air_pm_25=data["air_pm_25"],
+                    air_pm_1=data["air_pm_1"],
+                    aqi_level=self.cnv.aqi_level(data["air_pm_25_havg"]),
+                    aqi=self.cnv.aqi_description(data["air_pm_25_havg"]),
+                    forecast=data["forecast"],
+                    indoor_temperature=self.cnv.temperature(data["indoor_temperature"]),
+                    indoor_humidity=data["indoor_humidity"],
+                    air_density=self.cnv.air_density(data["air_temperature"], data["station_pressure"]),
+                    wet_bulb=self.cnv.temperature(wet_bulb),
+                    air_temperature_dmin=self.cnv.temperature(data["air_temperature_dmin"]),
+                    air_temperature_dmintime=self.cnv.utc_from_mbtime(data["air_temperature_dmintime"]),
+                    air_temperature_dmax=self.cnv.temperature(data["air_temperature_dmax"]),
+                    air_temperature_dmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_dmaxtime"]),
+                    air_temperature_mmin=self.cnv.temperature(data["air_temperature_mmin"]),
+                    air_temperature_mmintime=self.cnv.utc_from_mbtime(data["air_temperature_mmintime"]),
+                    air_temperature_mmax=self.cnv.temperature(data["air_temperature_mmax"]),
+                    air_temperature_mmaxtime=self.cnv.utc_from_mbtime(data["air_temperature_mmaxtime"]),
+                    air_temperature_ymin=self.cnv.temperature(data["air_temperature_ymin"]),
+                    air_temperature_ymintime=self.cnv.utc_from_mbtime(data["air_temperature_ymintime"]),
+                    air_temperature_ymax=self.cnv.temperature(data["air_temperature_ymax"]),
+                    air_temperature_ymaxtime=self.cnv.utc_from_mbtime(data["air_temperature_ymaxtime"]),
+                    temperature_soil_1=self.cnv.temperature(data["temperature_soil_1"]),
+                    humidity_soil_1=data["humidity_soil_1"],
+                    temperature_soil_2=self.cnv.temperature(data["temperature_soil_2"]),
+                    humidity_soil_2=data["humidity_soil_2"],
+                    temperature_soil_3=self.cnv.temperature(data["temperature_soil_3"]),
+                    humidity_soil_3=data["humidity_soil_3"],
+                    temperature_soil_4=self.cnv.temperature(data["temperature_soil_4"]),
+                    humidity_soil_4=data["humidity_soil_4"],
+                    temperature_leaf_1=self.cnv.temperature(data["temperature_leaf_1"]),
+                    humidity_leaf_1=data["humidity_leaf_1"],
+                    temperature_leaf_2=self.cnv.temperature(data["temperature_leaf_2"]),
+                    humidity_leaf_2=data["humidity_leaf_2"],
+                    temperature_leaf_3=self.cnv.temperature(data["temperature_leaf_3"]),
+                    humidity_leaf_3=data["humidity_leaf_3"],
+                    temperature_leaf_4=self.cnv.temperature(data["temperature_leaf_4"]),
+                    humidity_leaf_4=data["humidity_leaf_4"],
+                    is_freezing=self.cnv.is_freezing(data["air_temperature"]),
+                    is_raining=self.cnv.is_raining(data["precip_rate"]),
+                )
 
-            if self.extra_sensors > 0:
-                extra_sensors = await self._get_extra_sensor_values()
+                if self.extra_sensors > 0:
+                    extra_sensors = await self._get_extra_sensor_values()
 
-                sensor_num = 1
-                while sensor_num < self.extra_sensors + 1:
-                    temp_field = f"temperature_extra_{sensor_num}"
-                    setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
-                    hum_field = f"relative_humidity_extra_{sensor_num}"
-                    setattr(entity_data, hum_field, extra_sensors[hum_field])
-                    heat_field = f"heat_index_extra_{sensor_num}"
-                    setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
-                    sensor_num += 1
+                    sensor_num = 1
+                    while sensor_num < self.extra_sensors + 1:
+                        temp_field = f"temperature_extra_{sensor_num}"
+                        setattr(entity_data, temp_field, self.cnv.temperature(extra_sensors[temp_field]))
+                        hum_field = f"relative_humidity_extra_{sensor_num}"
+                        setattr(entity_data, hum_field, extra_sensors[hum_field])
+                        heat_field = f"heat_index_extra_{sensor_num}"
+                        setattr(entity_data, heat_field, self.cnv.temperature(extra_sensors[heat_field]))
+                        sensor_num += 1
 
-            return entity_data
+                return entity_data
+        except Exception as e:
+            error_message = f"Error occured processing data. Error message: {str(e)}"
+            if "NoneType" in str(e):
+                error_message = "Wrong dataset returned from Meteobridge. Check station is fully operational."
+            raise BadRequest(error_message) from None
 
         return None
 
