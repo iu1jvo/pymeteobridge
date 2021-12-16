@@ -2,6 +2,13 @@
 
 This document will cover all major changes to the module.
 
+## [0.1.16] - Unreleased
+
+### Changes
+
+- Added error handling to data processing function, to ensure program does not crash, but instead raises a retry exception.
+
+
 ## [0.1.15] - 2021-12-15
 
 ### Changes
