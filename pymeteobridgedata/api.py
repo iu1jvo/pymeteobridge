@@ -110,7 +110,6 @@ class MeteobridgeApiClient:
                     data["relative_humidity"],
                     data["dew_point"]
                 )
-                wind_chill = self.cnv.wind_chill(data["air_temperature"], data["wind_gust"])
                 feels_like = self.cnv.feels_like(
                     data["air_temperature"],
                     data["relative_humidity"],
@@ -149,7 +148,7 @@ class MeteobridgeApiClient:
                     lightning_strike_count=data["lightning_strike_count"],
                     lightning_strike_last_distance=data["lightning_strike_last_distance"],
                     heat_index=self.cnv.temperature(data["heat_index"]),
-                    wind_chill=self.cnv.temperature(wind_chill),
+                    wind_chill=self.cnv.temperature(data["wind_chill"]),
                     feels_like=self.cnv.temperature(feels_like),
                     dew_point=self.cnv.temperature(data["dew_point"]),
                     trend_temperature=data["trend_temperature"],
