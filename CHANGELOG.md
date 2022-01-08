@@ -2,6 +2,13 @@
 
 This document will cover all major changes to the module.
 
+## [0.1.17] - 2022-01-08
+
+### Changes
+
+- Wind Chill was until now a Calculated value, as the Meteobridge had issues with WeatherFlow stations and Wind Chill calculations. As this is now fixed, we use the wind_chill value from the Meteobridge station.
+
+
 ## [0.1.16] - 2021-12-16
 
 ### Changes
