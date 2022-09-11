@@ -131,6 +131,7 @@ class MeteobridgeApiClient:
                     station_pressure=self.cnv.pressure(data["station_pressure"]),
                     relative_humidity=data["relative_humidity"],
                     precip_accum_local_day=self.cnv.rain(data["precip_accum_local_day"]),
+                    precip_accum_last24h=self.cnv.rain(data["precip_accum_last24h"]),
                     precip_accum_month=self.cnv.rain(data["precip_accum_month"]),
                     precip_accum_year=self.cnv.rain(data["precip_accum_year"]),
                     precip_rate=self.cnv.rain(data["precip_rate"]),
