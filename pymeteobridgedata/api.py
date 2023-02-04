@@ -56,8 +56,12 @@ class MeteobridgeApiClient:
         self.req = session
 
         self.cnv = Conversions(self.units, self.homeassistant)
-
-        self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
+        if "https://" in self.ip_address:
+            _ip_address = self.ip_address[8:]
+            self.base_url = (f"https://{self.username}:{self.password}@{_ip_address}"
+                         "/cgi-bin/template.cgi?template=")
+        else:
+            self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
                          "/cgi-bin/template.cgi?template=")
         self._device_data: DataLoggerDescription = None
         self._is_metric = self.units is UNIT_TYPE_METRIC
