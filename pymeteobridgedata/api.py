@@ -58,8 +58,10 @@ class MeteobridgeApiClient:
         self.cnv = Conversions(self.units, self.homeassistant)
         if "https://" in self.ip_address:
             _ip_address = self.ip_address[8:]
+            if _ip_address[-1] != "/":
+                _ip_address = _ip_address + "/"
             self.base_url = (f"https://{self.username}:{self.password}@{_ip_address}"
-                         "/cgi-bin/template.cgi?template=")
+                         "cgi-bin/template.cgi?template=")
         else:
             self.base_url = (f"http://{self.username}:{self.password}@{self.ip_address}"
                          "/cgi-bin/template.cgi?template=")
