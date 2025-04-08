@@ -118,6 +118,9 @@ class ObservationDescription:
     humidity_leaf_3: float | None = None
     temperature_leaf_4: float | None = None
     humidity_leaf_4: float | None = None
+    rain_sensor_lowbat: int | None = None
+    th_sensor_lowbat: int | None = None
+    wind_sensor_lowbat: int | None = None
 
 
 @dataclass

@@ -202,6 +202,9 @@ class MeteobridgeApiClient:
                     humidity_leaf_4=data["humidity_leaf_4"],
                     is_freezing=self.cnv.is_freezing(data["air_temperature"]),
                     is_raining=self.cnv.is_raining(data["precip_rate"]),
+                    rain_sensor_lowbat = data["rain_sensor_lowbat"],
+                    th_sensor_lowbat=data["th_sensor_lowbat"],
+                    wind_sensor_lowbat=data["wind_sensor_lowbat"],
                 )
 
                 if self.extra_sensors > 0:
