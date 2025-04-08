@@ -62,6 +62,10 @@ FIELDS_OBSERVATION = [
     ["humidity_leaf_3", "leaf2hum-act.0:None", "int"],
     ["temperature_leaf_4", "leaf3temp-act:None", "float"],
     ["humidity_leaf_4", "leaf3hum-act.0:None", "int"],
+    ["rain_sensor_lowbat", "rain0!0lowbat-act.0:None", "int"],
+    ["th_sensor_lowbat", "th0!0lowbat-act.0:None", "int"],
+    ["wind_sensor_lowbat", "wind0!0lowbat-act.0:None", "int"],
+
 ]
 
 FIELDS_STATION = [

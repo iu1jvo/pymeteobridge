@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 test.py
 .DS_Store
+
+#PyCharme
+.idea/
