@@ -2,6 +2,14 @@
 
 This document will cover all major changes to the module.
 
+## [0.1.21] - 2025-03-08
+
+### Changes
+- Added sensors to retrieve the weather station battery status, the sensors are:
+  - Main Wind sensor battery
+  - Main Temperature/Humidity sensor battery
+  - Main Rain sensor battery
+
 ## [0.1.17] - 2022-01-08
 
 ### Changes
