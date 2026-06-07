@@ -1,0 +1,179 @@
+name: Bump Version Files
+
+# When you push a tag vX.Y.Z this workflow:
+#   1. Updates version in custom_components/meteobridge/manifest.json
+#   2. Commits the changes directly to master
+#   3. Moves the tag to point at the new commit
+#   4. Creates a GitHub Release with changelog
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  bump-versions:
+    name: Bump version files to ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Extract version (strip leading 'v')
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Bump setup.cfg
+        run: |
+          python3 - <<'EOF'
+          from pathlib import Path
+          import os
+          import subprocess
+          import datetime
+
+          path = Path("setup.cfg")
+          version = os.environ["VERSION"]
+          tag = os.environ["GITHUB_REF_NAME"]
+
+          lines = path.read_text(encoding="utf-8").splitlines()
+          out = []
+          in_metadata = False
+          replaced = False
+
+          for line in lines:
+              stripped = line.strip()
+              if stripped.startswith("[") and stripped.endswith("]"):
+                  in_metadata = stripped.lower() == "[metadata]"
+
+              if in_metadata and stripped.startswith("version") and not replaced:
+                  out.append(f"version = {version}")
+                  replaced = True
+                  continue
+
+              out.append(line)
+
+          if not replaced:
+              raise SystemExit("Could not find version in setup.cfg")
+
+          path.write_text("\n".join(out) + "\n", encoding="utf-8")
+          print(f"setup.cfg: updated version → {version}")
+
+          try:
+              prev_tag = subprocess.run(
+                  ["git", "describe", "--tags", "--abbrev=0", f"{tag}^"],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              ).stdout.strip()
+          except subprocess.CalledProcessError:
+              prev_tag = ""
+
+          if prev_tag:
+              rev_range = f"{prev_tag}..{tag}"
+          else:
+              rev_range = tag
+
+          changelog = subprocess.run(
+              ["git", "log", rev_range, "--pretty=format:- %s (%h)"],
+              check=True,
+              capture_output=True,
+              text=True,
+          ).stdout.strip()
+
+          if not changelog:
+              changelog = "- No changes found"
+
+          changelog_file = Path("CHANGELOG.md")
+          new_content = ["# Changelog", "", f"## {tag} - {datetime.date.today().isoformat()}", "", changelog, ""]
+
+          if changelog_file.exists():
+              old = changelog_file.read_text(encoding="utf-8").splitlines()
+              if old and old[0].strip().lower() == "# changelog":
+                  existing = old
+              else:
+                  existing = ["# Changelog", ""] + old
+              content = "\n".join(new_content + existing).rstrip() + "\n"
+          else:
+              content = "\n".join(new_content).rstrip() + "\n"
+
+          changelog_file.write_text(content, encoding="utf-8")
+          print(f"CHANGELOG.md: updated with release {tag}")
+          EOF
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: Commit bumped files and push to master
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add setup.cfg CHANGELOG.md
+
+          if git diff --cached --quiet; then
+            echo "No version change – skipping commit."
+          else
+            git commit -m "chore: bump version to ${{ github.ref_name }} [skip ci]"
+            git push origin HEAD:${{ github.event.repository.default_branch }}
+          fi
+
+      - name: Move tag to new commit
+        run: |
+          git tag -f ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }} --force
+
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: bump-versions
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Extract version (strip leading 'v')
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog from commits
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s (%h)" | head -20)
+          else
+            LOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)")
+          fi
+          echo "log<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOG"     >> $GITHUB_OUTPUT
+          echo "EOF"      >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: |
+            ## What's changed
+            ${{ steps.changelog.outputs.log }}
+
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
