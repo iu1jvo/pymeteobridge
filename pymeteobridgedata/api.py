@@ -84,7 +84,7 @@ class MeteobridgeApiClient:
             device_data = DataLoggerDescription(
                 key=data["mac"],
                 mac=data["mac"],
-                swversion=data["swversion"],
+                swversion=str(data["swversion"]),
                 platform=self.cnv.hw_platform(data["platform"]),
                 station=data["station"],
                 timezone=data["timezone"],
