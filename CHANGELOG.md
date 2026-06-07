@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.23 - 2026-06-07
+
+- fix changelog (565dfc3)
+
+# Changelog
+
 This document will cover all major changes to the module.
 
 ## v0.1.22 - 2026-06-07
