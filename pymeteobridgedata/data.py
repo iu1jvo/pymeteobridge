@@ -10,7 +10,7 @@ class DataLoggerDescription:
 
     key: str
     mac: str | None = None
-    swversion: float | None = None
+    swversion: str | None = None
     platform: str | None = None
     station: str | None = None
     timezone: str | None = None
